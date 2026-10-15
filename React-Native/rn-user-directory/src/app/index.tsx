@@ -1,24 +1,8 @@
-import { SafeAreaView, StyleSheet, Text, View } from 'react-native';
-import UserCard from '../components/UserCard';
+import { StyleSheet } from 'react-native';
+import UserDirectoryScreen from '../features/users/presentation/screens/UserDirectoryScreen';
 
 export default function HomeScreen() {
-  return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>User Directory</Text>
-        <Text style={styles.subtitle}>
-          My first React Native component
-        </Text>
-      </View>
-
-      <UserCard
-        name="Aarav Sharma"
-        email="aarav.sharma@example.com"
-        city="Mumbai, India"
-        avatarUrl="https://i.pravatar.cc/150?img=12"
-      />
-    </SafeAreaView>
-  );
+ return <UserDirectoryScreen />;
 }
 
 const styles = StyleSheet.create({
@@ -38,5 +22,8 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#6B7280',
     marginTop: 6,
+  },
+  listContent: {
+    padding: 16,
   },
 });

@@ -1,26 +1,19 @@
 import { Image, StyleSheet, Text, View } from 'react-native';
+import type { User } from '../../domain/models/User';
 
 type UserCardProps = {
-  name: string;
-  email: string;
-  city: string;
-  avatarUrl: string;
-};
+  user: User;
+}
 
-export default function UserCard({
-  name,
-  email,
-  city,
-  avatarUrl,
-}: UserCardProps) {
+export default function UserCard({ user }: UserCardProps) {
   return (
     <View style={styles.card}>
-      <Image source={{ uri: avatarUrl }} style={styles.avatar} />
+      <Image source={{ uri: user.avatarUrl }} style={styles.avatar} />
 
       <View style={styles.details}>
-        <Text style={styles.name}>{name}</Text>
-        <Text style={styles.email}>{email}</Text>
-        <Text style={styles.city}>{city}</Text>
+        <Text style={styles.name}>{user.name}</Text>
+        <Text style={styles.email}>{user.email}</Text>
+        <Text style={styles.city}>{user.city}</Text>
       </View>
     </View>
   );
