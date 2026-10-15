@@ -63,7 +63,7 @@ npx expo start --clear
 
 ## Project Structure
 
-The app uses Expo Router's file-based routing.
+The app uses Expo Router for file-based routing and follows an MVVM-style presentation structure with Clean Architecture principles.
 
 ```text
 rn-user-directory/
@@ -71,12 +71,21 @@ rn-user-directory/
 │   ├── app/
 │   │   ├── _layout.tsx
 │   │   └── index.tsx
-│   ├── components/
-│   ├── models/
-│   ├── services/
-│   ├── hooks/
-│   ├── constants/
-│   └── utils/
+│   ├── features/
+│   │   └── users/
+│   │       ├── domain/
+│   │       │   └── models/
+│   │       │       └── User.ts
+│   │       ├── data/
+│   │       │   └── mockUsers.ts
+│   │       └── presentation/
+│   │           ├── components/
+│   │           │   └── UserCard.tsx
+│   │           ├── hooks/
+│   │           │   └── useUsersViewModel.ts
+│   │           └── screens/
+│   │               └── UserDirectoryScreen.tsx
+│   └── global.css
 ├── assets/
 ├── app.json
 ├── package.json
@@ -84,13 +93,14 @@ rn-user-directory/
 └── README.md
 ```
 
-This is the **planned structure**. Create folders and files as the implementation grows; don't add empty folders just to match the diagram.
+The structure above reflects the current implementation. Additional layers, such as repositories and API services, will be introduced as the project evolves.
+
 
 ## Implementation Roadmap
 
-- [ ] **Phase 1:** App foundation and reusable UI components
-- [ ] **Phase 2:** User model and static sample data
-- [ ] **Phase 3:** User list and profile cards
+- [x] **Phase 1:** Application foundation, reusable UI components, typed user model, and MVVM-style presentation structure
+- [x] **Phase 2:** User model and static sample data
+- [x] **Phase 3:** User list and profile cards using `FlatList`
 - [ ] **Phase 4:** REST API integration and request-state handling
 - [ ] **Phase 5:** Search, filtering, and pull-to-refresh
 - [ ] **Phase 6:** User details and navigation
@@ -98,6 +108,8 @@ This is the **planned structure**. Create folders and files as the implementatio
 - [ ] **Phase 8:** Error handling, retry, and performance optimization
 - [ ] **Phase 9:** Accessibility, dark mode, and offline considerations
 - [ ] **Phase 10:** Unit tests, component tests, linting, and CI/CD
+
+**Current status:** Foundation and static user list completed. Next, integrate the REST API with a repository layer.
 
 Update these checkboxes as each phase is completed.
 
