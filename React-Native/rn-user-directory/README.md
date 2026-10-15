@@ -1,56 +1,127 @@
-# Welcome to your Expo app 👋
+# React Native User Directory
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A hands-on React Native learning project built with **Expo, TypeScript, and Expo Router** as part of the [Mobile-Interview-Lab](../../README.md) repository.
 
-## Get started
+The goal is to build a production-minded User Directory app while practising React Native development, mobile architecture, API integration, testing, performance, and interview concepts.
 
-1. Install dependencies
+## Project Goals
 
-   ```bash
-   npm install
-   ```
+- Build reusable, typed React Native components.
+- Display a list of users and their profile details.
+- Integrate a REST API and handle loading, success, empty, and error states.
+- Implement search, filtering, and pull-to-refresh.
+- Add user detail navigation and favourites.
+- Practise state management, performance optimization, accessibility, and testing.
+- Prepare for React Native developer and mobile architect interviews.
 
-2. Start the app
+## Tech Stack
 
-   ```bash
-   npx expo start
-   ```
+- **Framework:** React Native with Expo
+- **Language:** TypeScript
+- **Navigation:** Expo Router
+- **API:** JSONPlaceholder — https://jsonplaceholder.typicode.com/users
+- **Development tools:** Node.js, npm, Expo Go, iOS Simulator, and Android Emulator
 
-In the output, you'll find options to open the app in a
+Additional libraries will be introduced when they are needed and documented here.
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## Getting Started
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+### Prerequisites
 
-## Get a fresh project
+- Node.js and npm
+- A compatible version of Expo Go for a physical device, or an installed iOS Simulator / Android Emulator
+- Git
 
-When you're ready, run:
+For native simulator setup, see the [Expo iOS Simulator guide](https://docs.expo.dev/workflow/ios-simulator/) and [Android Emulator guide](https://docs.expo.dev/workflow/android-studio-emulator/).
+
+### Install dependencies
+
+From the repository root:
 
 ```bash
-npm run reset-project
+cd React-Native/rn-user-directory
+npm install
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### Start the development server
 
-### Other setup steps
+```bash
+npx expo start
+```
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+Then choose an option:
 
-## Learn more
+- Press `i` to open the iOS Simulator, when available.
+- Press `a` to open the Android Emulator, when available.
+- Scan the QR code with Expo Go on a compatible physical device. Usually, your computer and device should be on the same Wi-Fi network.
 
-To learn more about developing your project with Expo, look at the following resources:
+To restart with a cleared Metro cache:
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```bash
+npx expo start --clear
+```
 
-## Join the community
+## Project Structure
 
-Join our community of developers creating universal apps.
+The app uses Expo Router's file-based routing.
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+```text
+rn-user-directory/
+├── src/
+│   ├── app/
+│   │   ├── _layout.tsx
+│   │   └── index.tsx
+│   ├── components/
+│   ├── models/
+│   ├── services/
+│   ├── hooks/
+│   ├── constants/
+│   └── utils/
+├── assets/
+├── app.json
+├── package.json
+├── package-lock.json
+└── README.md
+```
+
+This is the **planned structure**. Create folders and files as the implementation grows; don't add empty folders just to match the diagram.
+
+## Implementation Roadmap
+
+- [ ] **Phase 1:** App foundation and reusable UI components
+- [ ] **Phase 2:** User model and static sample data
+- [ ] **Phase 3:** User list and profile cards
+- [ ] **Phase 4:** REST API integration and request-state handling
+- [ ] **Phase 5:** Search, filtering, and pull-to-refresh
+- [ ] **Phase 6:** User details and navigation
+- [ ] **Phase 7:** Favourites and state management
+- [ ] **Phase 8:** Error handling, retry, and performance optimization
+- [ ] **Phase 9:** Accessibility, dark mode, and offline considerations
+- [ ] **Phase 10:** Unit tests, component tests, linting, and CI/CD
+
+Update these checkboxes as each phase is completed.
+
+## Useful Commands
+
+```bash
+# Start the app
+npx expo start
+
+# Check the project configuration
+npx expo-doctor
+
+# Run linting if configured
+npx expo lint
+```
+
+## Learning Resources
+
+- [Expo Documentation](https://docs.expo.dev/)
+- [Expo Router](https://docs.expo.dev/router/introduction/)
+- [React Native Documentation](https://reactnative.dev/docs/getting-started)
+- [TypeScript Documentation](https://www.typescriptlang.org/docs/)
+- [JSONPlaceholder API](https://jsonplaceholder.typicode.com/)
+
+## Related Documentation
+
+See the [Mobile-Interview-Lab root README](../../README.md) for the shared roadmap, cross-platform feature requirements, and progress across iOS, Android, Flutter, and React Native.

@@ -1,205 +1,275 @@
 # Mobile-Interview-Lab
 Mobile Interview Lab (iOS, React Native, Flutter, Android)
 
-A hands-on learning repository for practising mobile development concepts, preparing for technical interviews, and building practical applications across iOS, Flutter, React Native, and Android.
+A cross-platform mobile development learning repository focused on hands-on practice, technical interview preparation, and real-world mobile application development.
 
-The goal is to build every feature from scratch, understand the underlying concepts, and progressively evolve small applications into production-style projects.
+The same set of features will be implemented independently across four platforms:
+
+- **Native iOS:** Swift, SwiftUI, UIKit
+- **Native Android:** Kotlin, Jetpack Compose
+- **Flutter:** Dart and Flutter
+- **React Native:** React Native, TypeScript, Expo
+
+The goal is to understand how the same application requirements are designed, implemented, tested, and optimized using different mobile technologies.
 
 ## Repository Structure
 
 ```text
 Mobile-Interview-Lab/
-├── iOS/                         # Swift, SwiftUI, UIKit
-├── Flutter/                     # Flutter and Dart
-├── React-Native/                # React Native and TypeScript
-│   └── rn-user-directory/       # User Directory practice app
-├── Android/                     # Kotlin and Android development
 ├── README.md
-└── .gitignore
+├── .gitignore
+├── iOS/
+├── Android/
+├── Flutter/
+└── React-Native/
 ```
 
-## Current Focus: React Native
+Each platform will have its own application source code and platform-specific development instructions. All platforms will follow the shared feature roadmap defined in this README.
 
-**Project:** `rn-user-directory`
+## Shared Application: User Directory
 
-**Technology stack:**
-- React Native
-- Expo
-- TypeScript
-- Expo Router
-- REST API integration (planned)
-- Redux Toolkit (planned)
+Our first application will be a **User Directory** that displays users, their profile images, contact information, and detailed profiles.
 
-The application will start with simple static components and gradually introduce real-world functionality. Features will be implemented incrementally to reinforce core concepts and interview preparation.
+The feature requirements will remain consistent across platforms. Implementation details, architecture, tooling, and platform-specific behaviour may differ.
 
-## Planned Feature Roadmap
+### Common Feature Roadmap
 
-### Phase 1 — React Native Fundamentals
-- [x] Create the Expo + TypeScript project.
-- [x] Run the application on the iOS Simulator.
-- [x] Run the application on a physical Android device.
-- [x] Create a minimal home screen.
-- [ ] Build reusable components and understand component composition.
-- [ ] Practise props, TypeScript interfaces/types, and component styling.
-- [ ] Render multiple users using `map()` and understand React keys.
+#### Phase 1 — Application Foundation
+- [ ] Create the application entry screen.
+- [ ] Build reusable UI components.
+- [ ] Display static sample users.
+- [ ] Define typed user models.
+- [ ] Establish a consistent layout and styling approach.
 
-### Phase 2 — User Directory and Lists
-- [ ] Build a user directory with static sample data.
-- [ ] Display user names, email addresses, cities, and profile images.
-- [ ] Use `FlatList` for efficient list rendering.
-- [ ] Handle missing images and image-loading failures.
-- [ ] Implement search and filtering.
-- [ ] Add pull-to-refresh.
+#### Phase 2 — User Lists and Images
+- [ ] Display user names, email addresses, and cities.
+- [ ] Show profile images and placeholder avatars.
+- [ ] Handle image loading and failure states.
+- [ ] Implement efficient list rendering.
+- [ ] Add search and filtering.
 
-### Phase 3 — REST API Integration
-- [ ] Fetch sample users from JSONPlaceholder.
-- [ ] Separate API calls into a service layer.
-- [ ] Practise `fetch`, promises, and `async/await`.
+#### Phase 3 — REST API Integration
+- [ ] Fetch users from a sample REST API.
+- [ ] Separate networking logic from UI components.
 - [ ] Implement loading, success, empty, and error states.
-- [ ] Add retry handling and prevent duplicate requests.
+- [ ] Add retry handling.
 - [ ] Implement pagination or infinite scrolling.
+- [ ] Add pull-to-refresh.
 
 Sample API: https://jsonplaceholder.typicode.com/users
 
-### Phase 4 — Navigation and User Profiles
-- [ ] Configure screen navigation using Expo Router.
-- [ ] Navigate from the user list to a user details screen.
-- [ ] Pass route parameters and display selected user details.
-- [ ] Handle back navigation and screen state.
+#### Phase 4 — Navigation and User Details
+- [ ] Navigate from the user list to a profile details screen.
+- [ ] Pass selected user information between screens.
+- [ ] Display complete user details.
+- [ ] Implement back navigation.
 
-### Phase 5 — State Management
-- [ ] Understand local state with `useState`.
-- [ ] Practise side effects with `useEffect`.
-- [ ] Learn `useMemo` and `useCallback`.
-- [ ] Build custom hooks.
-- [ ] Integrate Redux Toolkit.
-- [ ] Understand Store, Slices, Reducers, Actions, and Selectors.
-- [ ] Handle asynchronous API requests using Redux Toolkit's `createAsyncThunk`.
-- [ ] Implement favourites and shared application state.
+#### Phase 5 — State Management
+- [ ] Manage local screen state.
+- [ ] Introduce platform-appropriate state management.
+- [ ] Implement favourite users.
+- [ ] Handle asynchronous API state.
+- [ ] Prevent duplicate requests and stale updates.
 
-### Phase 6 — Advanced React Native Concepts
-- [ ] Improve `FlatList` performance.
-- [ ] Implement debounced search.
-- [ ] Handle network failures and simulated offline scenarios.
-- [ ] Add dark mode and theme support.
-- [ ] Explore platform-specific behaviour for iOS and Android.
-- [ ] Understand React rendering, reconciliation, and the JavaScript event loop.
+#### Phase 6 — Advanced Features
+- [ ] Debounced search.
+- [ ] Dark mode and theme support.
+- [ ] Network error and offline-state handling.
+- [ ] Performance optimization.
+- [ ] Accessibility support.
+- [ ] Platform-specific UI and behaviour.
 
-### Phase 7 — Testing and Code Quality
-- [ ] Add Jest tests.
-- [ ] Practise React Native Testing Library.
-- [ ] Test components, user interactions, and loading/error states.
-- [ ] Mock API requests.
-- [ ] Add linting and formatting.
-- [ ] Establish a maintainable project structure and separation of concerns.
+#### Phase 7 — Testing and Code Quality
+- [ ] Unit tests.
+- [ ] UI and component/widget tests.
+- [ ] API mocking.
+- [ ] Error-state testing.
+- [ ] Linting and formatting.
+- [ ] Code organization and architecture improvements.
 
-### Phase 8 — Build and CI/CD
-- [ ] Understand Expo development builds.
-- [ ] Learn Android and iOS build workflows.
-- [ ] Explore EAS Build and EAS Submit.
-- [ ] Configure a basic CI pipeline.
-- [ ] Learn environment configuration and secure handling of secrets.
+#### Phase 8 — Build and CI/CD
+- [ ] Configure platform-specific build workflows.
+- [ ] Automate tests and quality checks.
+- [ ] Build installable application packages.
+- [ ] Explore signing and release processes.
+- [ ] Document CI/CD workflows.
 
-## Required Development Tools
+## Development Environment and Required Tools
 
-### Core tools
+Each platform requires a different development toolchain. Install only the tools needed for the platform you are currently working on.
 
-| Tool | Purpose |
-|---|---|
-| Node.js (LTS recommended) | JavaScript runtime and development tooling |
-| npm | Package and dependency management |
-| Git | Version control |
-| Visual Studio Code or another editor | Code editing |
-| Expo CLI via `npx expo` | Start and manage the Expo project |
+### 1. Native iOS
 
-### iOS development
+**Technology:** Swift, SwiftUI, UIKit
 
-| Tool | Purpose |
-|---|---|
-| macOS | iOS development environment |
-| Xcode | iOS Simulator, SDKs, and native build tools |
-| iOS Simulator | Test the application on simulated iPhones |
+Required tools:
+- A Mac running a compatible version of macOS.
+- Xcode, including the iOS SDK and iOS Simulator.
+- Git.
+- A code editor or Xcode itself.
 
-### Android development
+Optional or project-dependent:
+- Swift Package Manager for dependencies (integrated into Xcode).
+- CocoaPods if a selected dependency requires it.
+- Fastlane for build and release automation.
 
-| Tool | Purpose |
-|---|---|
-| Expo Go | Run compatible Expo projects on a physical Android device |
-| Android Studio | Android SDKs, emulator, and native development tools |
-| Android Emulator | Test the application on virtual Android devices |
+Verify the setup:
 
-**Optional tools:** Homebrew for installing development utilities, CocoaPods when required by native iOS dependencies, and EAS CLI for supported Expo build and deployment workflows.
+```bash
+xcodebuild -version
+swift --version
+git --version
+```
 
-For the current Expo Go workflow, a separate native build setup is not required to start practising basic components and API integration.
+### 2. Native Android
 
-## Installation and Setup
+**Technology:** Kotlin, Jetpack Compose
 
-### 1. Verify the prerequisites
+Required tools:
+- Android Studio.
+- Android SDK and platform tools.
+- Android Emulator or a physical Android device.
+- Git.
+
+Optional or project-dependent:
+- Java Development Kit compatible with the selected Android Gradle Plugin.
+- Gradle tooling, normally managed by the project wrapper.
+
+Verify the setup:
+
+```bash
+java -version
+adb version
+git --version
+```
+
+### 3. Flutter
+
+**Technology:** Flutter, Dart
+
+Required tools:
+- Flutter SDK, which includes Dart.
+- Git.
+- Android Studio or Android SDK tools for Android builds.
+- Xcode for iOS builds on macOS.
+- An editor such as Visual Studio Code or Android Studio.
+
+Verify the setup:
+
+```bash
+flutter --version
+dart --version
+flutter doctor
+```
+
+### 4. React Native
+
+**Technology:** React Native, TypeScript, Expo
+
+Required tools for our initial Expo workflow:
+- Node.js (LTS recommended by Expo).
+- npm.
+- Git.
+- An editor such as Visual Studio Code.
+- Expo Go for compatible projects running on a physical device.
+
+For local native development:
+- Xcode and the iOS Simulator for iOS.
+- Android Studio and Android SDK tools for Android.
+
+Optional or project-dependent:
+- EAS CLI for Expo build and submission workflows.
+- CocoaPods and native build tooling when using a development build or native dependencies.
+
+Verify the setup:
 
 ```bash
 node -v
 npm -v
-git --version
+npx expo --version
 ```
 
-For iOS development, also verify:
+## Setup Instructions
+
+### Repository Setup
+
+Clone the repository:
 
 ```bash
-xcodebuild -version
+git clone <YOUR_REPOSITORY_URL>
+cd Mobile-Interview-Lab
 ```
 
-### 2. Navigate to the React Native project
+Choose the platform you want to practise and follow the corresponding instructions below.
 
-From the repository root:
+### React Native — Current Focus
+
+Navigate to the project:
 
 ```bash
 cd React-Native/rn-user-directory
 ```
 
-### 3. Install dependencies
-
-If dependencies are not already installed:
+Install dependencies if required:
 
 ```bash
 npm install
 ```
 
-### 4. Start the application
+Start Expo:
 
 ```bash
 npx expo start
 ```
 
-- Press `i` to open the iOS Simulator.
-- Press `a` to open an available Android emulator.
-- Scan the QR code using Expo Go to run the application on a compatible physical device.
+Use the Expo terminal shortcuts to launch the iOS Simulator or Android emulator, or scan the QR code using Expo Go on a compatible physical device.
 
-The Mac and physical device should normally be on the same Wi-Fi network when using the default local connection.
+### Native iOS
 
-### 5. Validate the project
+Open the iOS project in Xcode once its project files have been created.
+
+Build and run using an available iOS Simulator or connected device.
+
+### Native Android
+
+Open the Android project in Android Studio once its Gradle project files have been created.
+
+Sync Gradle, select a device, and run the application.
+
+### Flutter
+
+Navigate to the Flutter project once initialized:
 
 ```bash
-npx expo-doctor
+cd Flutter/user_directory
+flutter pub get
+flutter run
 ```
 
-This checks common Expo project configuration and dependency issues.
+## Cross-Platform Learning Approach
 
-## Learning Principles
+1. Define a common feature requirement.
+2. Implement it in the current platform.
+3. Understand the framework-specific implementation and trade-offs.
+4. Test the feature.
+5. Document interview questions and key concepts.
+6. Repeat the feature in the other platforms.
+7. Compare performance, architecture, maintainability, and developer experience.
 
-1. **Build from scratch:** Implement features ourselves rather than copying a complete application.
-2. **Learn incrementally:** Add one concept at a time and verify it before proceeding.
-3. **Understand the code:** Know why a component, hook, service, or state-management solution is needed.
-4. **Practise interview questions:** Connect each implementation to common interview questions and trade-offs.
-5. **Maintain code quality:** Use TypeScript, reusable components, clear naming, and appropriate testing.
-6. **Support both platforms:** Validate behaviour on iOS and Android wherever practical.
-7. **Track progress:** Keep completed features and future tasks updated in this README.
+## Progress Tracking
+
+The root README tracks shared feature requirements. Platform-specific READMEs will document setup instructions, architecture decisions, implementation details, and platform-specific progress.
+
+Only mark a shared feature complete when it has been implemented and verified in the relevant platform.
 
 ## Project Status
 
-**Current milestone:** Initial Expo + TypeScript setup and minimal screen.
+**Current focus:** React Native + Expo + TypeScript.
 
-**Next milestone:** Build the first reusable `UserCard` component and practise rendering multiple static users.
+**Initial milestone:** A minimal application screen is running on the iOS Simulator and a physical Android device.
+
+**Next milestone:** Build the first reusable component and implement the shared User Directory feature set.
 
 ## Disclaimer
 
-This repository is intended for learning, experimentation, and interview preparation. Sample APIs and demonstration data are used for practice, not as production data sources.
+This repository is intended for educational purposes, experimentation, and technical interview preparation. Sample API services and demonstration data are not intended for production use.
