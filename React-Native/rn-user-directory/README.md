@@ -61,6 +61,57 @@ To restart with a cleared Metro cache:
 npx expo start --clear
 ```
 
+## Troubleshooting
+
+### 1. Expo Go fails to download the app bundle
+
+If Expo Go on a physical device displays an error such as `java.io.IOException: Failed to download`, the device may be unable to connect to the Expo development server.
+
+**Solution:**
+
+Stop the current Expo process by pressing `Ctrl + C`, then start Expo in tunnel mode:
+
+```bash
+npx expo start --tunnel
+```
+
+Wait for the new QR code to appear and scan it using Expo Go.
+
+### 2. Ngrok tunnel connection times out
+
+If Expo displays:
+
+```text
+CommandError: ngrok tunnel took too long to connect.
+```
+
+Try the following:
+
+1. Retry with `npx expo start --tunnel`.
+2. Check that your internet connection is stable.
+3. Temporarily disconnect any VPN on your Mac or phone.
+4. If tunnel mode continues to fail, try LAN mode using `npx expo start --clear`. Ensure both devices are on the same Wi-Fi network and that the network allows communication between them.
+
+If Expo prompts you to install `@expo/ngrok`, approve the installation.
+
+### 3. Clear the Expo bundler cache
+
+If the app displays stale code or behaves unexpectedly after changes, restart Expo with a clean cache:
+
+```bash
+npx expo start --clear
+```
+
+### 4. User list or API loading issues
+
+If the app opens but users do not load:
+
+- Check your internet connection.
+- Verify the API endpoint: https://jsonplaceholder.typicode.com/users
+- Inspect the Expo terminal or JavaScript logs for errors.
+- Confirm that `useUsersViewModel.ts` calls `fetchUsers()` instead of loading `mockUsers`.
+
+
 ## Project Structure
 
 The app uses Expo Router for file-based routing and follows an MVVM-style presentation structure with Clean Architecture principles.
@@ -101,13 +152,14 @@ The structure above reflects the current implementation. Additional layers, such
 - [x] **Phase 1:** Application foundation, reusable UI components, typed user model, and MVVM-style presentation structure
 - [x] **Phase 2:** User model and static sample data
 - [x] **Phase 3:** User list and profile cards using `FlatList`
-- [ ] **Phase 4:** REST API integration and request-state handling
+- [x] **Phase 4:** REST API integration and request-state handling
 - [ ] **Phase 5:** Search, filtering, and pull-to-refresh
 - [ ] **Phase 6:** User details and navigation
 - [ ] **Phase 7:** Favourites and state management
 - [ ] **Phase 8:** Error handling, retry, and performance optimization
 - [ ] **Phase 9:** Accessibility, dark mode, and offline considerations
 - [ ] **Phase 10:** Unit tests, component tests, linting, and CI/CD
+
 
 **Current status:** Foundation and static user list completed. Next, integrate the REST API with a repository layer.
 
