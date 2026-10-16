@@ -2,35 +2,35 @@ import type { User } from '../domain/models/User';
 
 export const mockUsers: User[] = [
   {
-    id: "1",
-    name: 'Nitesh Meshram',
+    id: 1,
+    name: 'Tashvi Meshram',
     email: 'nitesh.meshram@example.com',
     city: 'Mumbai, India',
     avatarUrl: 'https://i.pravatar.cc/150?img=12',
   },
   {
-    id: "2",
+    id: 2,
     name: 'Priya Patel',
     email: 'priya.patel@example.com',
     city: 'Pune, India',
     avatarUrl: 'https://i.pravatar.cc/150?img=47',
   },
   {
-    id: "3",
+    id: 3,
     name: 'Rahul Verma',
     email: 'rahul.verma@example.com',
     city: 'Bengaluru, India',
     avatarUrl: 'https://i.pravatar.cc/150?img=13',
   },
   {
-    id: "4",
+    id: 4,
     name: 'Ananya Desai',
     email: 'ananya.desai@example.com',
     city: 'Hyderabad, India',
     avatarUrl: 'https://i.pravatar.cc/150?img=44',
   },
   {
-    id: "5",
+    id: 5,
     name: 'Karan Mehta',
     email: 'karan.mehta@example.com',
     city: 'Delhi, India',
