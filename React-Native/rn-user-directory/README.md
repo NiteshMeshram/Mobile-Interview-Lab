@@ -154,7 +154,7 @@ The structure above reflects the current implementation. Additional layers, such
 - [x] **Phase 3:** User list and profile cards using `FlatList`
 - [x] **Phase 4:** REST API integration and request-state handling
 - [x] **Phase 5:** Search, filtering, and pull-to-refresh
-- [ ] **Phase 6:** User details and navigation
+- [x] **Phase 6:** User details, dynamic navigation, and in-memory user caching
 - [ ] **Phase 7:** Favourites and state management
 - [ ] **Phase 8:** Error handling, retry, and performance optimization
 - [ ] **Phase 9:** Accessibility, dark mode, and offline considerations

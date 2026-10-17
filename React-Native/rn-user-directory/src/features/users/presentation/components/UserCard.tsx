@@ -1,13 +1,31 @@
-import { Image, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import type { User } from '../../domain/models/User';
+import { router } from 'expo-router';
 
 type UserCardProps = {
   user: User;
 }
 
 export default function UserCard({ user }: UserCardProps) {
+  const handlePress = () => {
+    console.log('Opening user details:', user.id);
+    router.push({
+      pathname: '/users/[id]',
+      params: { id: String(user.id) },
+    });
+  };
+
   return (
-    <View style={styles.card}>
+    <Pressable
+      onPress={handlePress}
+      accessibilityRole="button"
+      accessibilityLabel={`View details for ${user.name}`}
+      style={({ pressed }) => [
+        styles.card,
+        pressed && styles.cardPressed,
+      ]}
+    >
+      {/* <View style={styles.card}> */}
       <Image source={{ uri: user.avatarUrl }} style={styles.avatar} />
 
       <View style={styles.details}>
@@ -15,7 +33,11 @@ export default function UserCard({ user }: UserCardProps) {
         <Text style={styles.email}>{user.email}</Text>
         <Text style={styles.city}>{user.city}</Text>
       </View>
-    </View>
+      {/* </View> */}
+
+
+    </Pressable>
+
   );
 }
 
@@ -54,5 +76,8 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#6B7280',
     marginTop: 4,
+  },
+  cardPressed: {
+    opacity: 0.75,
   },
 });

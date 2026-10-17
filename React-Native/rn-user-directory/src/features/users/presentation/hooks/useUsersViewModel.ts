@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import type { User } from '../../domain/models/User';
 import { fetchUsers } from '../../data/userService';
 import { mapApiUserToUser } from '../../data/mappers/userMapper';
+import { setCachedUsers } from '../../data/userCache';
 
 export function useUsersViewModel() {
   const [users, setUsers] = useState<User[]>([]);
@@ -25,6 +26,7 @@ export function useUsersViewModel() {
       const apiUsers = await fetchUsers();
       const mappedUsers = apiUsers.map(mapApiUserToUser);
 
+      setCachedUsers(mappedUsers);
       setUsers(mappedUsers);
     } catch (err: unknown) {
       const message =
