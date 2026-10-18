@@ -7,11 +7,13 @@ import {
   useAppSelector,
 } from '../../../../store/hooks';
 
+import { memo } from 'react';
+
 type UserCardProps = {
   user: User;
 }
 
-export default function UserCard({ user }: UserCardProps) {
+function UserCard({ user }: UserCardProps) {
   const dispatch = useAppDispatch();
 
   const isFavourite = useAppSelector((state) =>
@@ -68,6 +70,8 @@ export default function UserCard({ user }: UserCardProps) {
 
   );
 }
+
+export default memo(UserCard);
 
 const styles = StyleSheet.create({
   card: {

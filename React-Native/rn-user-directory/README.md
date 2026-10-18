@@ -156,10 +156,19 @@ The structure above reflects the current implementation. Additional layers, such
 - [x] **Phase 5:** Search, filtering, and pull-to-refresh
 - [x] **Phase 6:** User details, dynamic navigation, and in-memory user caching
 - [x] **Phase 7:** Favourites and state management
-- [ ] **Phase 8:** Error handling, retry, and performance optimization
+- [x] **Phase 8:** Error handling, retry, and performance optimization
 - [ ] **Phase 9:** Accessibility, dark mode, and offline considerations
 - [ ] **Phase 10:** Unit tests, component tests, linting, and CI/CD
 
+### Phase 8: Error Handling and Performance
+
+- Added user-friendly API error handling and retry support.
+- Added pull-to-refresh request handling.
+- Protected against stale API responses using request IDs.
+- Added `AbortController` support for cancelling in-flight requests.
+- Handled aborted requests separately from normal API errors.
+- Optimized user cards with `React.memo`.
+- Manually verified error recovery, refresh, navigation, search, filters, and favourites.
 
 **Current status:** Foundation and static user list completed. Next, integrate the REST API with a repository layer.
 

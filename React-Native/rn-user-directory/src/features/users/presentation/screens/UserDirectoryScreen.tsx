@@ -20,6 +20,7 @@ function UserDirectoryScreen() {
     setSelectedCity,
     isRefreshing,
     refreshUsers,
+    retryUsers,
   } = useUsersViewModel();
 
   const favouriteUserIds = useAppSelector(
@@ -35,9 +36,25 @@ function UserDirectoryScreen() {
   if (error) {
     return (
       <SafeAreaView style={styles.container}>
-        <View style={styles.centered}>
-          <Text>Unable to load users.</Text>
-          <Text>{error}</Text>
+        <View style={styles.errorContent}>
+          <Text style={styles.errorTitle}>
+            Unable to load users
+          </Text>
+
+          <Text style={styles.errorMessage}>
+            {error}
+          </Text>
+
+          <Pressable
+            onPress={retryUsers}
+            accessibilityRole="button"
+            accessibilityLabel="Try loading users again"
+            style={styles.retryButton}
+          >
+            <Text style={styles.retryButtonText}>
+              Try Again
+            </Text>
+          </Pressable>
         </View>
       </SafeAreaView>
     );
@@ -168,7 +185,8 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 24,
+    paddingHorizontal: 24,
+    paddingVertical: 24,
   },
   errorContainer: {
     padding: 20,
@@ -279,5 +297,38 @@ const styles = StyleSheet.create({
   viewToggleTextSelected: {
     color: '#FFFFFF',
     fontWeight: '600',
+  },
+  retryButton: {
+    marginTop: 16,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    backgroundColor: '#2563EB',
+    borderRadius: 8,
+  },
+
+  retryButtonText: {
+    color: '#FFFFFF',
+    fontWeight: '600',
+    fontSize: 16,
+  },
+  errorContent: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+  },
+  errorTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#111827',
+    textAlign: 'center',
+  },
+
+  errorMessage: {
+    fontSize: 15,
+    color: '#6B7280',
+    textAlign: 'center',
+    marginTop: 8,
+    lineHeight: 22,
   },
 });
