@@ -19,9 +19,14 @@ import {
   setCachedUsers,
 } from '../../features/users/data/userCache';
 
+import { useAppTheme } from '../../theme/useAppTheme';
+import type { AppColors } from '../../theme/colors';
+
 export default function UserDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const { colors } = useAppTheme();
+  const styles = createStyles(colors);
 
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -29,15 +34,33 @@ export default function UserDetailsScreen() {
 
   useEffect(() => {
     let isActive = true;
-/*
     async function loadUser() {
       try {
         setIsLoading(true);
         setError(null);
 
+        const userId = Number(id);
+
+        if (!Number.isInteger(userId) || userId <= 0) {
+          throw new Error('Invalid user ID.');
+        }
+
+        const cachedUser = getCachedUserById(userId);
+
+        if (cachedUser) {
+          if (isActive) {
+            setUser(cachedUser);
+          }
+          return;
+        }
+
         const apiUsers = await fetchUsers();
-        const selectedUser = apiUsers.find(
-          (apiUser) => String(apiUser.id) === id,
+        const mappedUsers = apiUsers.map(mapApiUserToUser);
+
+        setCachedUsers(mappedUsers);
+
+        const selectedUser = mappedUsers.find(
+          (item) => item.id === userId,
         );
 
         if (!selectedUser) {
@@ -45,7 +68,7 @@ export default function UserDetailsScreen() {
         }
 
         if (isActive) {
-          setUser(mapApiUserToUser(selectedUser));
+          setUser(selectedUser);
         }
       } catch {
         if (isActive) {
@@ -57,57 +80,6 @@ export default function UserDetailsScreen() {
         }
       }
     }
-    */
-    
-
-
-
-async function loadUser() {
-  try {
-    setIsLoading(true);
-    setError(null);
-
-    const userId = Number(id);
-
-    if (!Number.isInteger(userId) || userId <= 0) {
-      throw new Error('Invalid user ID.');
-    }
-
-    const cachedUser = getCachedUserById(userId);
-
-    if (cachedUser) {
-      if (isActive) {
-        setUser(cachedUser);
-      }
-      return;
-    }
-
-    const apiUsers = await fetchUsers();
-    const mappedUsers = apiUsers.map(mapApiUserToUser);
-
-    setCachedUsers(mappedUsers);
-
-    const selectedUser = mappedUsers.find(
-      (item) => item.id === userId,
-    );
-
-    if (!selectedUser) {
-      throw new Error('User not found.');
-    }
-
-    if (isActive) {
-      setUser(selectedUser);
-    }
-  } catch {
-    if (isActive) {
-      setError('Unable to load user details. Please try again.');
-    }
-  } finally {
-    if (isActive) {
-      setIsLoading(false);
-    }
-  }
-}
 
 
     void loadUser();
@@ -136,7 +108,10 @@ async function loadUser() {
         <Text style={styles.message}>{error}</Text>
       ) : user ? (
         <View style={styles.profile}>
-          <Image source={{ uri: user.avatarUrl }} style={styles.avatar} />
+          <Image
+            source={{ uri: user.avatarUrl }} style={styles.avatar}
+            accessibilityLabel={`Profile photo of ${user.name}`}
+          />
           <Text style={styles.name}>{user.name}</Text>
           <Text style={styles.label}>Email</Text>
           <Text style={styles.value}>{user.email}</Text>
@@ -150,58 +125,59 @@ async function loadUser() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 24,
-    paddingTop: 60,
-    backgroundColor: '#F9FAFB',
-  },
-  backButton: {
-    alignSelf: 'flex-start',
-    marginBottom: 32,
-    paddingVertical: 8,
-  },
-  backText: {
-    fontSize: 16,
-    color: '#2563EB',
-    fontWeight: '600',
-  },
-  profile: {
-    alignItems: 'center',
-    padding: 24,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    elevation: 2,
-  },
-  avatar: {
-    width: 110,
-    height: 110,
-    borderRadius: 55,
-    backgroundColor: '#E5E7EB',
-    marginBottom: 16,
-  },
-  name: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#111827',
-    textAlign: 'center',
-    marginBottom: 24,
-  },
-  label: {
-    alignSelf: 'stretch',
-    fontSize: 13,
-    color: '#6B7280',
-    marginTop: 12,
-  },
-  value: {
-    alignSelf: 'stretch',
-    fontSize: 16,
-    color: '#111827',
-    marginTop: 4,
-  },
-  message: {
-    fontSize: 16,
-    color: '#B91C1C',
-  },
-});
+const createStyles = (colors: AppColors) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      padding: 24,
+      paddingTop: 60,
+      backgroundColor: colors.background
+    },
+    backButton: {
+      alignSelf: 'flex-start',
+      marginBottom: 32,
+      paddingVertical: 8,
+    },
+    backText: {
+      fontSize: 16,
+      color: colors.primary,
+      fontWeight: '600',
+    },
+    profile: {
+      alignItems: 'center',
+      padding: 24,
+      backgroundColor: colors.surface,
+      borderRadius: 16,
+      elevation: 2,
+    },
+    avatar: {
+      width: 110,
+      height: 110,
+      borderRadius: 55,
+      backgroundColor: colors.toggleBackground,
+      marginBottom: 16,
+    },
+    name: {
+      fontSize: 24,
+      fontWeight: '700',
+      color: colors.text,
+      textAlign: 'center',
+      marginBottom: 24,
+    },
+    label: {
+      alignSelf: 'stretch',
+      fontSize: 13,
+      color: colors.textSecondary,
+      marginTop: 12,
+    },
+    value: {
+      alignSelf: 'stretch',
+      fontSize: 16,
+      color: colors.text,
+      marginTop: 4,
+    },
+    message: {
+      fontSize: 16,
+      color: '#B91C1C',
+    },
+  });

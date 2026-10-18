@@ -6,8 +6,10 @@ import {
   useAppDispatch,
   useAppSelector,
 } from '../../../../store/hooks';
+import { useAppTheme } from '../../../../theme/useAppTheme';
 
 import { memo } from 'react';
+import { AppColors } from '@/theme/colors';
 
 type UserCardProps = {
   user: User;
@@ -15,6 +17,8 @@ type UserCardProps = {
 
 function UserCard({ user }: UserCardProps) {
   const dispatch = useAppDispatch();
+  const { colors } = useAppTheme();
+   const styles = createStyles(colors);
 
   const isFavourite = useAppSelector((state) =>
     state.favourites.favouriteUserIds.includes(user.id),
@@ -73,14 +77,15 @@ function UserCard({ user }: UserCardProps) {
 
 export default memo(UserCard);
 
-const styles = StyleSheet.create({
+const createStyles = (colors: AppColors) =>
+  StyleSheet.create({
   card: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
     marginHorizontal: 16,
     marginVertical: 8,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     borderRadius: 12,
     elevation: 2,
   },
@@ -88,7 +93,7 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: '#E5E7EB',
+    backgroundColor: colors.toggleBackground,
   },
   details: {
     flex: 1,
@@ -97,16 +102,16 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#111827',
+    color: colors.text,
   },
   email: {
     fontSize: 14,
-    color: '#4B5563',
+    color: colors.textSecondary,
     marginTop: 4,
   },
   city: {
     fontSize: 13,
-    color: '#6B7280',
+    color: colors.textSecondary,
     marginTop: 4,
   },
   cardPressed: {
@@ -118,7 +123,7 @@ const styles = StyleSheet.create({
   },
   heart: {
     fontSize: 28,
-    color: '#6B7280',
+    color: colors.textSecondary,
   },
   activeHeart: {
     color: '#DC2626',
