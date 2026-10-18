@@ -8,7 +8,8 @@
     "scheme": "rnuserdirectory",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/expo.icon",
+      "bundleIdentifier": "com.anonymous.rn-user-directory"
     },
     "android": {
       "adaptiveIcon": {

@@ -1,4 +1,3 @@
-import { StyleSheet } from 'react-native';
 import UserDirectoryScreen from '../features/users/presentation/screens/UserDirectoryScreen';
 
 export default function HomeScreen() {

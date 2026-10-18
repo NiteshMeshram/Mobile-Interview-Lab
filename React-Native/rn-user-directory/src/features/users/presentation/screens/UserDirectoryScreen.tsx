@@ -1,7 +1,6 @@
 import { useUsersViewModel } from '../hooks/useUsersViewModel';
-import { StyleSheet, FlatList, Text, View, ActivityIndicator, Pressable, TextInput } from 'react-native';
+import { StyleSheet, FlatList, Text, View, ActivityIndicator, Pressable, TextInput, RefreshControl } from 'react-native';
 import UserCard from '../components/UserCard';
-import { RefreshControl } from 'react-native';
 import { useAppSelector } from '../../../../store/hooks';
 import { useState } from 'react';
 import { useAppTheme } from '../../../../theme/useAppTheme';
@@ -11,7 +10,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 export default UserDirectoryScreen;
 
 function UserDirectoryScreen() {
-  const { colors, isDark } = useAppTheme();
+  const { colors } = useAppTheme();
   const styles = createStyles(colors);
   const {
     isLoading,
@@ -37,7 +36,7 @@ function UserDirectoryScreen() {
     ? filteredUsers.filter((user) => favouriteUserIds.includes(user.id))
     : filteredUsers;
 
-  if (error) {
+  if (error && displayedUsers.length === 0) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.errorContent}>

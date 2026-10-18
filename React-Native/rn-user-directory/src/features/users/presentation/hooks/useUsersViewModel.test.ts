@@ -1,7 +1,7 @@
 
 import { act, renderHook, waitFor } from '@testing-library/react-native';
 import { fetchUsers } from '../../data/services/userService';
-import { setCachedUsers } from '../../data/userCache';
+import { loadCachedUsers, setCachedUsers } from '../../data/userCache';
 import { useUsersViewModel } from './useUsersViewModel';
 import type { ApiUser } from '../../domain/models/ApiUser';
 
@@ -10,6 +10,7 @@ jest.mock('../../data/services/userService', () => ({
 }));
 
 jest.mock('../../data/userCache', () => ({
+  loadCachedUsers: jest.fn(),
   setCachedUsers: jest.fn(),
 }));
 
@@ -58,10 +59,12 @@ const mockApiUsers: ApiUser[] = [
 
 const mockedFetchUsers = jest.mocked(fetchUsers);
 const mockedSetCachedUsers = jest.mocked(setCachedUsers);
+const mockedLoadCachedUsers = jest.mocked(loadCachedUsers);
 
 describe('useUsersViewModel', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockedLoadCachedUsers.mockResolvedValue([]);
   });
 
   it('loads and maps users successfully', async () => {
@@ -82,6 +85,73 @@ describe('useUsersViewModel', () => {
       result.current.users,
     );
   });
+
+  it('restores cached users before the network request', async () => {
+    const cachedUsers = [
+      {
+        id: 1,
+        name: 'Cached User',
+        email: 'cached@example.com',
+        city: 'Mumbai',
+        avatarUrl: 'https://example.com/avatar.png',
+      },
+    ];
+
+    jest.mocked(loadCachedUsers).mockResolvedValue(cachedUsers);
+
+    // Keep the network request pending so we can inspect the cache first.
+    let resolveFetch!: (users: ApiUser[]) => void;
+
+    jest.mocked(fetchUsers).mockImplementation(
+      () =>
+        new Promise<ApiUser[]>((resolve) => {
+          resolveFetch = resolve;
+        }),
+    );
+
+    const { result } = renderHook(() => useUsersViewModel());
+
+    await waitFor(() => {
+      expect(result.current.users).toEqual(cachedUsers);
+    });
+
+    expect(loadCachedUsers).toHaveBeenCalledTimes(1);
+
+    // Complete the network request to let the hook finish cleanly.
+    await act(async () => {
+      resolveFetch(mockApiUsers);
+    });
+
+    await waitFor(() => {
+      expect(result.current.users).toHaveLength(2);
+    });
+  });
+
+  it('keeps cached users when the network request fails', async () => {
+    const cachedUsers = [
+      {
+        id: 1,
+        name: 'Cached User',
+        email: 'cached@example.com',
+        city: 'Mumbai',
+        avatarUrl: 'https://example.com/avatar.png',
+      },
+    ];
+
+    jest.mocked(loadCachedUsers).mockResolvedValue(cachedUsers);
+    jest.mocked(fetchUsers).mockRejectedValue(
+      new Error('Network unavailable'),
+    );
+
+    const { result } = renderHook(() => useUsersViewModel());
+
+    await waitFor(() => {
+      expect(result.current.error).toBe('Network unavailable');
+    });
+
+    expect(result.current.users).toEqual(cachedUsers);
+  });
+
 
   it('filters users by name, email, and city', async () => {
     mockedFetchUsers.mockResolvedValue(mockApiUsers);

@@ -2,7 +2,10 @@ import { useEffect, useState, useRef } from 'react';
 import type { User } from '../../domain/models/User';
 import { fetchUsers } from '../../data/services/userService';
 import { mapApiUserToUser } from '../../data/mappers/userMapper';
-import { setCachedUsers } from '../../data/userCache';
+import {
+  loadCachedUsers,
+  setCachedUsers,
+} from '../../data/userCache';
 
 export function useUsersViewModel() {
   const [users, setUsers] = useState<User[]>([]);
@@ -14,16 +17,14 @@ export function useUsersViewModel() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const requestIdRef = useRef(0);
   const activeControllerRef = useRef<AbortController | null>(null);
-  
-  const loadUsers = async (isRefresh = false, signal?: AbortSignal) => {
+
+  const loadUsers = async (isRefresh = false) => {
     const requestId = ++requestIdRef.current;
 
     activeControllerRef.current?.abort();
 
     const controller = new AbortController();
     activeControllerRef.current = controller;
-
-    const requestSignal = signal ?? controller.signal;
 
     try {
       if (isRefresh) {
@@ -34,8 +35,20 @@ export function useUsersViewModel() {
 
       setError(null);
 
-      const apiUsers = await fetchUsers(requestSignal);
+      // Restore saved users before the network request.
+      if (!isRefresh) {
+        const cachedUsers = await loadCachedUsers();
+
+        if (requestId !== requestIdRef.current) return;
+
+        if (cachedUsers.length > 0) {
+          setUsers(cachedUsers);
+        }
+      }
       if (requestId !== requestIdRef.current) return;
+
+      const apiUsers = await fetchUsers(controller.signal);
+
       const mappedUsers = apiUsers.map(mapApiUserToUser);
 
       setCachedUsers(mappedUsers);
