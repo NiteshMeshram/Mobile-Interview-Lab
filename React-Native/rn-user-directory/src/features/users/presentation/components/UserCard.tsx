@@ -1,18 +1,32 @@
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import type { User } from '../../domain/models/User';
 import { router } from 'expo-router';
+import { toggleFavourite } from '../../../favourites/favouritesSlice';
+import {
+  useAppDispatch,
+  useAppSelector,
+} from '../../../../store/hooks';
 
 type UserCardProps = {
   user: User;
 }
 
 export default function UserCard({ user }: UserCardProps) {
+  const dispatch = useAppDispatch();
+
+  const isFavourite = useAppSelector((state) =>
+    state.favourites.favouriteUserIds.includes(user.id),
+  );
   const handlePress = () => {
     console.log('Opening user details:', user.id);
     router.push({
       pathname: '/users/[id]',
       params: { id: String(user.id) },
     });
+  };
+
+  const handleToggleFavourite = () => {
+    dispatch(toggleFavourite(user.id));
   };
 
   return (
@@ -25,7 +39,6 @@ export default function UserCard({ user }: UserCardProps) {
         pressed && styles.cardPressed,
       ]}
     >
-      {/* <View style={styles.card}> */}
       <Image source={{ uri: user.avatarUrl }} style={styles.avatar} />
 
       <View style={styles.details}>
@@ -33,7 +46,22 @@ export default function UserCard({ user }: UserCardProps) {
         <Text style={styles.email}>{user.email}</Text>
         <Text style={styles.city}>{user.city}</Text>
       </View>
-      {/* </View> */}
+
+      <Pressable
+        onPress={handleToggleFavourite}
+        accessibilityRole="button"
+        accessibilityLabel={
+          isFavourite
+            ? `Remove ${user.name} from favourites`
+            : `Add ${user.name} to favourites`
+        }
+        hitSlop={8}
+        style={styles.favouriteButton}
+      >
+        <Text style={[styles.heart, isFavourite && styles.activeHeart]}>
+          {isFavourite ? '♥' : '♡'}
+        </Text>
+      </Pressable>
 
 
     </Pressable>
@@ -79,5 +107,16 @@ const styles = StyleSheet.create({
   },
   cardPressed: {
     opacity: 0.75,
+  },
+  favouriteButton: {
+    padding: 8,
+    marginLeft: 8,
+  },
+  heart: {
+    fontSize: 28,
+    color: '#6B7280',
+  },
+  activeHeart: {
+    color: '#DC2626',
   },
 });

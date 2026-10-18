@@ -3,6 +3,9 @@ import { StyleSheet, FlatList, SafeAreaView, Text, View, ActivityIndicator, Pres
 import { TextInput } from 'react-native';
 import UserCard from '../components/UserCard';
 import { RefreshControl } from 'react-native';
+import { useAppSelector } from '../../../../store/hooks';
+import { useState } from 'react';
+
 export default UserDirectoryScreen;
 
 function UserDirectoryScreen() {
@@ -18,6 +21,16 @@ function UserDirectoryScreen() {
     isRefreshing,
     refreshUsers,
   } = useUsersViewModel();
+
+  const favouriteUserIds = useAppSelector(
+    (state) => state.favourites.favouriteUserIds,
+  );
+
+  const [showFavouritesOnly, setShowFavouritesOnly] = useState(false);
+
+  const displayedUsers = showFavouritesOnly
+    ? filteredUsers.filter((user) => favouriteUserIds.includes(user.id))
+    : filteredUsers;
 
   if (error) {
     return (
@@ -47,8 +60,45 @@ function UserDirectoryScreen() {
         clearButtonMode="while-editing"
       />
 
-      {console.log('[CityFilter] cities:', cities)}
-      {console.log('[CityFilter] selectedCity:', selectedCity)}
+      <View style={styles.viewToggle}>
+        <Pressable
+          style={[
+            styles.viewToggleButton,
+            !showFavouritesOnly && styles.viewToggleButtonSelected,
+          ]}
+          onPress={() => setShowFavouritesOnly(false)}
+          accessibilityRole="button"
+          accessibilityState={{ selected: !showFavouritesOnly }}
+        >
+          <Text
+            style={[
+              styles.viewToggleText,
+              !showFavouritesOnly && styles.viewToggleTextSelected,
+            ]}
+          >
+            All Users
+          </Text>
+        </Pressable>
+
+        <Pressable
+          style={[
+            styles.viewToggleButton,
+            showFavouritesOnly && styles.viewToggleButtonSelected,
+          ]}
+          onPress={() => setShowFavouritesOnly(true)}
+          accessibilityRole="button"
+          accessibilityState={{ selected: showFavouritesOnly }}
+        >
+          <Text
+            style={[
+              styles.viewToggleText,
+              showFavouritesOnly && styles.viewToggleTextSelected,
+            ]}
+          >
+            Favourites ({favouriteUserIds.length})
+          </Text>
+        </Pressable>
+      </View>
 
       <FlatList
         horizontal
@@ -83,7 +133,7 @@ function UserDirectoryScreen() {
       />
 
       <FlatList
-        data={filteredUsers}
+        data={displayedUsers}
         keyExtractor={(user) => user.id.toString()}
         renderItem={({ item }) => <UserCard user={item} />}
         contentContainerStyle={styles.listContent}
@@ -196,6 +246,37 @@ const styles = StyleSheet.create({
   },
 
   cityChipTextSelected: {
+    color: '#FFFFFF',
+    fontWeight: '600',
+  },
+  viewToggle: {
+    flexDirection: 'row',
+    marginHorizontal: 16,
+    marginTop: 8,
+    marginBottom: 8,
+    padding: 4,
+    borderRadius: 10,
+    backgroundColor: '#E5E7EB',
+  },
+
+  viewToggleButton: {
+    flex: 1,
+    paddingVertical: 10,
+    alignItems: 'center',
+    borderRadius: 8,
+  },
+
+  viewToggleButtonSelected: {
+    backgroundColor: '#2563EB',
+  },
+
+  viewToggleText: {
+    color: '#374151',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+
+  viewToggleTextSelected: {
     color: '#FFFFFF',
     fontWeight: '600',
   },
