@@ -11,7 +11,7 @@ import {
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 
 import type { User } from '../../features/users/domain/models/User';
-import { fetchUsers } from '../../features/users/data/userService';
+import { fetchUsers } from '../../features/users/data/services/userService';
 import { mapApiUserToUser } from '../../features/users/data/mappers/userMapper';
 
 import {

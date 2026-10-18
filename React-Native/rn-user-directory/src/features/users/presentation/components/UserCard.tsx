@@ -24,7 +24,6 @@ function UserCard({ user }: UserCardProps) {
     state.favourites.favouriteUserIds.includes(user.id),
   );
   const handlePress = () => {
-    console.log('Opening user details:', user.id);
     router.push({
       pathname: '/users/[id]',
       params: { id: String(user.id) },

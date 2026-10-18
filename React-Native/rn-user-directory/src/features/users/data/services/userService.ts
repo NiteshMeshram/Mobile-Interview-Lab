@@ -1,5 +1,5 @@
 const USERS_API_URL = 'https://jsonplaceholder.typicode.com/users';
-import type { ApiUser } from '../domain/models/ApiUser';
+import type { ApiUser } from '../../domain/models/ApiUser';
 
 // let shouldSimulateInitialFailure = true; // Test retry mechanism by simulating initial failure
 

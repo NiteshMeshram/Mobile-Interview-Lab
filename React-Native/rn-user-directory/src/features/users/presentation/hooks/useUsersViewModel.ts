@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import type { User } from '../../domain/models/User';
-import { fetchUsers } from '../../data/userService';
+import { fetchUsers } from '../../data/services/userService';
 import { mapApiUserToUser } from '../../data/mappers/userMapper';
 import { setCachedUsers } from '../../data/userCache';
 
