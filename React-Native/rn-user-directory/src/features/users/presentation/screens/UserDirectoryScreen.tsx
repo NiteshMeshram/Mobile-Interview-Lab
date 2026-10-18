@@ -1,6 +1,5 @@
 import { useUsersViewModel } from '../hooks/useUsersViewModel';
-import { StyleSheet, FlatList, Text, View, ActivityIndicator, Pressable } from 'react-native';
-import { TextInput } from 'react-native';
+import { StyleSheet, FlatList, Text, View, ActivityIndicator, Pressable, TextInput } from 'react-native';
 import UserCard from '../components/UserCard';
 import { RefreshControl } from 'react-native';
 import { useAppSelector } from '../../../../store/hooks';

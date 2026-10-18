@@ -12,11 +12,9 @@ export function useUsersViewModel() {
   const [selectedCity, setSelectedCity] = useState('');
   const cities = [...new Set(users.map((user) => user.city))].sort();
   const [isRefreshing, setIsRefreshing] = useState(false);
-
   const requestIdRef = useRef(0);
   const activeControllerRef = useRef<AbortController | null>(null);
   
-
   const loadUsers = async (isRefresh = false, signal?: AbortSignal) => {
     const requestId = ++requestIdRef.current;
 
@@ -64,9 +62,12 @@ export function useUsersViewModel() {
   };
 
   useEffect(() => {
-    void loadUsers();
+    const timeoutId = setTimeout(() => {
+      void loadUsers();
+    }, 0);
 
     return () => {
+      clearTimeout(timeoutId);
       requestIdRef.current += 1;
       activeControllerRef.current?.abort();
       activeControllerRef.current = null;
