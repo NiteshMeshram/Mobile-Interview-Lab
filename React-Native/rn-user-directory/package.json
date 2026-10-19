@@ -53,6 +53,14 @@
   },
   "private": true,
   "jest": {
-    "preset": "jest-expo"
+    "preset": "jest-expo",
+    "coverageThreshold": {
+      "global": {
+        "statements": 75,
+        "branches": 75,
+        "functions": 75,
+        "lines": 75
+      }
+    }
   }
 }
