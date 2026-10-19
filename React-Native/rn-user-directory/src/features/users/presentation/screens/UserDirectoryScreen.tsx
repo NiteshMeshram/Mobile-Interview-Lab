@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { useAppTheme } from '../../../../theme/useAppTheme';
 import type { AppColors } from '../../../../theme/colors';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { router } from 'expo-router';
 
 export default UserDirectoryScreen;
 
@@ -263,8 +264,8 @@ const createStyles = (colors: AppColors) =>
     },
 
     cityChipSelected: {
-     backgroundColor: colors.primary,
-borderColor: colors.primary,
+      backgroundColor: colors.primary,
+      borderColor: colors.primary,
     },
 
     cityChipText: {
@@ -341,5 +342,19 @@ borderColor: colors.primary,
       textAlign: 'center',
       marginTop: 8,
       lineHeight: 22,
+    },
+    graphqlButton: {
+      alignSelf: 'flex-start',
+      backgroundColor: colors.primary,
+      paddingHorizontal: 16,
+      paddingVertical: 10,
+      borderRadius: 10,
+      marginTop: 14,
+    },
+
+    graphqlButtonText: {
+      color: colors.onPrimary,
+      fontSize: 14,
+      fontWeight: '600',
     },
   });

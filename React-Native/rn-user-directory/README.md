@@ -170,7 +170,69 @@ The structure above reflects the current implementation. Additional layers, such
 - Optimized user cards with `React.memo`.
 - Manually verified error recovery, refresh, navigation, search, filters, and favourites.
 
-**Current status:** Foundation and static user list completed. Next, integrate the REST API with a repository layer.
+## GraphQL POC
+
+Added a basic GraphQL user-profile feature alongside the existing REST User Directory.
+
+### Implementation Location
+
+- **Feature:** `src/features/graphql-profile/`
+  - `api/`
+    - `apolloClient.ts` — Apollo Client configuration
+    - `queries/userProfileQuery.ts` — GraphQL user-profile query
+  - `domain/models/`
+    - `GraphQLUser.ts` — TypeScript interfaces for user and post data
+  - `presentation/`
+    - `hooks/useGraphQLUserProfile.ts` — Custom hook for fetching profile data
+    - `components/`
+      - `GraphQLUserProfileCard.tsx` — Displays user details and posts
+      - `GraphQLProfileButton.tsx` — Navigates to the GraphQL profile screen
+- **Screen:** `src/app/graphql-profile.tsx`
+- **Apollo Provider:** `src/app/_layout.tsx`
+- **Integration:** Existing `UserCard` includes a GraphQL Profile button.
+
+### Implemented
+
+- **Apollo Client**
+  - Configured Apollo Client with the GraphQLZero demo API.
+  - Integrated `ApolloProvider` into the application root layout.
+
+- **GraphQL Query and TypeScript Models**
+  - Created a typed query to fetch user details and posts.
+  - Defined TypeScript interfaces for GraphQL user and post data.
+
+- **Data Fetching**
+  - Created the `useGraphQLUserProfile` custom hook.
+  - Added dynamic user ID handling.
+
+- **UI and Navigation**
+  - Created a GraphQL profile screen.
+  - Displayed user information, city, and posts.
+  - Added navigation from the existing User Directory.
+  - Implemented back navigation.
+
+- **Request States**
+  - Added loading and error states.
+  - Added retry and refresh functionality.
+  - Validated the user ID received through route parameters.
+
+### Future Enhancements — Deferred
+
+- [ ] Apollo cache configuration and fetch policies
+- [ ] GraphQL mutations for creating and updating posts
+- [ ] Pagination and infinite scrolling
+- [ ] Production-grade error handling
+- [ ] GraphQL Code Generator for automatic TypeScript types
+- [ ] Offline support and optimistic UI updates
+- [ ] GraphQL unit and component tests
+
+**GraphQL Status:** Basic POC implemented. Further enhancements are deferred until interview preparation is complete.
+
+## Current Project Status
+
+- **REST User Directory:** Phases 1–10 marked complete, subject to verification.
+- **GraphQL:** Basic POC implemented; further enhancements deferred.
+- **Next Focus:** React Native interview preparation.
 
 Update these checkboxes as each phase is completed.
 
