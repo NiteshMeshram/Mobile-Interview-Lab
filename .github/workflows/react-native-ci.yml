@@ -11,9 +11,6 @@ on:
   pull_request:
     branches:
       - main
-    paths:
-      - "React-Native/rn-user-directory/**"
-      - ".github/workflows/react-native-ci.yml"
 
 jobs:
   validate:
