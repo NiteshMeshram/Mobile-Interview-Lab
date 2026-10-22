@@ -11,8 +11,9 @@ import {
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 
 import type { User } from '../../features/users/domain/models/User';
-import { fetchUsers } from '../../features/users/data/services/userService';
 import { mapApiUserToUser } from '../../features/users/data/mappers/userMapper';
+import { FetchHttpClient } from '../../network/FetchHttpClient';
+import { UserApiService } from '../../features/users/data/services/userService';
 
 import {
   getCachedUserById,
@@ -21,6 +22,9 @@ import {
 
 import { useAppTheme } from '../../theme/useAppTheme';
 import type { AppColors } from '../../theme/colors';
+
+const httpClient = new FetchHttpClient();
+const userApiService = new UserApiService(httpClient);
 
 export default function UserDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -54,7 +58,7 @@ export default function UserDetailsScreen() {
           return;
         }
 
-        const apiUsers = await fetchUsers();
+        const apiUsers = await userApiService.fetchUsers();
         const mappedUsers = apiUsers.map(mapApiUserToUser);
 
         setCachedUsers(mappedUsers);

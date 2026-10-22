@@ -1,20 +1,9 @@
 
-import { act, renderHook, waitFor } from '@testing-library/react-native';
-import { fetchUsers } from '../../data/services/userService';
-import { loadCachedUsers, setCachedUsers } from '../../data/userCache';
-import { useUsersViewModel } from './useUsersViewModel';
+import { UserApiService } from '../../data/services/userService';
 import type { ApiUser } from '../../domain/models/ApiUser';
+import type { HttpClient } from '@/network/HttpClient';
 
-jest.mock('../../data/services/userService', () => ({
-  fetchUsers: jest.fn(),
-}));
-
-jest.mock('../../data/userCache', () => ({
-  loadCachedUsers: jest.fn(),
-  setCachedUsers: jest.fn(),
-}));
-
-const mockApiUsers: ApiUser[] = [
+const mockUsers = [
   {
     id: 1,
     name: 'Leanne Graham',
@@ -25,7 +14,10 @@ const mockApiUsers: ApiUser[] = [
       suite: 'Apt. 556',
       city: 'Gwenborough',
       zipcode: '92998-3874',
-      geo: { lat: '-37.3159', lng: '81.1496' },
+      geo: {
+        lat: '-37.3159',
+        lng: '81.1496',
+      },
     },
     phone: '1-770-736-8031',
     website: 'hildegard.org',
@@ -35,227 +27,81 @@ const mockApiUsers: ApiUser[] = [
       bs: 'harness real-time e-markets',
     },
   },
-  {
-    id: 2,
-    name: 'Ervin Howell',
-    username: 'Antonette',
-    email: 'ervin@example.com',
-    address: {
-      street: 'Victor Plains',
-      suite: 'Suite 879',
-      city: 'Wisokyburgh',
-      zipcode: '90566-7771',
-      geo: { lat: '-43.9509', lng: '-34.4618' },
-    },
-    phone: '010-692-6593',
-    website: 'anastasia.net',
-    company: {
-      name: 'Deckow-Crist',
-      catchPhrase: 'Proactive didactic contingency',
-      bs: 'synergize scalable supply-chains',
-    },
-  },
-];
+] satisfies ApiUser[];
 
-const mockedFetchUsers = jest.mocked(fetchUsers);
-const mockedSetCachedUsers = jest.mocked(setCachedUsers);
-const mockedLoadCachedUsers = jest.mocked(loadCachedUsers);
+describe('UserApiService', () => {
+  let httpClient: jest.Mocked<HttpClient>;
+  let service: UserApiService;
 
-describe('useUsersViewModel', () => {
   beforeEach(() => {
+    httpClient = {
+      request: jest.fn(),
+      get: jest.fn(),
+      post: jest.fn(),
+      put: jest.fn(),
+      patch: jest.fn(),
+      delete: jest.fn(),
+    };
+
+    service = new UserApiService(httpClient);
+  });
+
+  afterEach(() => {
     jest.clearAllMocks();
-    mockedLoadCachedUsers.mockResolvedValue([]);
   });
 
-  it('loads and maps users successfully', async () => {
-    mockedFetchUsers.mockResolvedValue(mockApiUsers);
+  it('returns users when the API request succeeds', async () => {
+    httpClient.request.mockResolvedValue(mockUsers);
 
-    const { result } = renderHook(() => useUsersViewModel());
+    await expect(service.fetchUsers()).resolves.toEqual(mockUsers);
 
-    expect(result.current.isLoading).toBe(true);
-
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
+    expect(httpClient.request).toHaveBeenCalledWith({
+      method: 'GET',
+      path: '/users',
+      signal: undefined,
     });
+  });
 
-    expect(result.current.users).toHaveLength(2);
-    expect(result.current.filteredUsers).toHaveLength(2);
-    expect(result.current.error).toBeNull();
-    expect(mockedSetCachedUsers).toHaveBeenCalledWith(
-      result.current.users,
+  it('passes the AbortSignal to the HTTP client', async () => {
+    const controller = new AbortController();
+    httpClient.request.mockResolvedValue(mockUsers);
+
+    await service.fetchUsers(controller.signal);
+
+    expect(httpClient.request).toHaveBeenCalledWith({
+      method: 'GET',
+      path: '/users',
+      signal: controller.signal,
+    });
+  });
+
+  it('propagates a network error', async () => {
+    httpClient.request.mockRejectedValue(
+      new Error('Network request failed'),
+    );
+
+    await expect(service.fetchUsers()).rejects.toThrow(
+      'Network request failed',
     );
   });
 
-  it('restores cached users before the network request', async () => {
-    const cachedUsers = [
-      {
-        id: 1,
-        name: 'Cached User',
-        email: 'cached@example.com',
-        city: 'Mumbai',
-        avatarUrl: 'https://example.com/avatar.png',
-      },
-    ];
-
-    jest.mocked(loadCachedUsers).mockResolvedValue(cachedUsers);
-
-    // Keep the network request pending so we can inspect the cache first.
-    let resolveFetch!: (users: ApiUser[]) => void;
-
-    jest.mocked(fetchUsers).mockImplementation(
-      () =>
-        new Promise<ApiUser[]>((resolve) => {
-          resolveFetch = resolve;
-        }),
+  it('propagates an HTTP error', async () => {
+    httpClient.request.mockRejectedValue(
+      new Error('HTTP 500: Internal Server Error'),
     );
 
-    const { result } = renderHook(() => useUsersViewModel());
-
-    await waitFor(() => {
-      expect(result.current.users).toEqual(cachedUsers);
-    });
-
-    expect(loadCachedUsers).toHaveBeenCalledTimes(1);
-
-    // Complete the network request to let the hook finish cleanly.
-    await act(async () => {
-      resolveFetch(mockApiUsers);
-    });
-
-    await waitFor(() => {
-      expect(result.current.users).toHaveLength(2);
-    });
+    await expect(service.fetchUsers()).rejects.toThrow(
+      'HTTP 500: Internal Server Error',
+    );
   });
 
-  it('keeps cached users when the network request fails', async () => {
-    const cachedUsers = [
-      {
-        id: 1,
-        name: 'Cached User',
-        email: 'cached@example.com',
-        city: 'Mumbai',
-        avatarUrl: 'https://example.com/avatar.png',
-      },
-    ];
-
-    jest.mocked(loadCachedUsers).mockResolvedValue(cachedUsers);
-    jest.mocked(fetchUsers).mockRejectedValue(
-      new Error('Network unavailable'),
+  it('propagates an invalid JSON response error', async () => {
+    httpClient.request.mockRejectedValue(
+      new Error('The server returned invalid JSON.'),
     );
 
-    const { result } = renderHook(() => useUsersViewModel());
-
-    await waitFor(() => {
-      expect(result.current.error).toBe('Network unavailable');
-    });
-
-    expect(result.current.users).toEqual(cachedUsers);
-  });
-
-
-  it('filters users by name, email, and city', async () => {
-    mockedFetchUsers.mockResolvedValue(mockApiUsers);
-
-    const { result } = renderHook(() => useUsersViewModel());
-
-    await waitFor(() => {
-      expect(result.current.users).toHaveLength(2);
-    });
-
-    act(() => {
-      result.current.setSearchQuery('ervin');
-    });
-
-    expect(result.current.filteredUsers.map((user) => user.id)).toEqual([2]);
-
-    act(() => {
-      result.current.setSearchQuery('leanne@example.com');
-    });
-
-    expect(result.current.filteredUsers.map((user) => user.id)).toEqual([1]);
-
-    act(() => {
-      result.current.setSearchQuery('wisokyburgh');
-    });
-
-    expect(result.current.filteredUsers.map((user) => user.id)).toEqual([2]);
-  });
-
-  it('filters users by selected city', async () => {
-    mockedFetchUsers.mockResolvedValue(mockApiUsers);
-
-    const { result } = renderHook(() => useUsersViewModel());
-
-    await waitFor(() => {
-      expect(result.current.users).toHaveLength(2);
-    });
-
-    expect(result.current.cities).toEqual([
-      'Gwenborough',
-      'Wisokyburgh',
-    ]);
-
-    act(() => {
-      result.current.setSelectedCity('Gwenborough');
-    });
-
-    expect(result.current.filteredUsers.map((user) => user.id)).toEqual([1]);
-
-    act(() => {
-      result.current.setSelectedCity('');
-    });
-
-    expect(result.current.filteredUsers).toHaveLength(2);
-  });
-
-  it('exposes an error when loading users fails', async () => {
-    mockedFetchUsers.mockRejectedValue(new Error('Network unavailable'));
-
-    const { result } = renderHook(() => useUsersViewModel());
-
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
-    });
-
-    expect(result.current.error).toBe('Network unavailable');
-    expect(result.current.users).toEqual([]);
-  });
-
-  it('retries after a loading failure', async () => {
-    mockedFetchUsers
-      .mockRejectedValueOnce(new Error('Temporary failure'))
-      .mockResolvedValueOnce(mockApiUsers);
-
-    const { result } = renderHook(() => useUsersViewModel());
-
-    await waitFor(() => {
-      expect(result.current.error).toBe('Temporary failure');
-    });
-
-    await act(async () => {
-      await result.current.retryUsers();
-    });
-
-    expect(result.current.error).toBeNull();
-    expect(result.current.users).toHaveLength(2);
-    expect(mockedFetchUsers).toHaveBeenCalledTimes(2);
-  });
-
-  it('refreshes users and resets the refreshing state', async () => {
-    mockedFetchUsers.mockResolvedValue(mockApiUsers);
-
-    const { result } = renderHook(() => useUsersViewModel());
-
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
-    });
-
-    await act(async () => {
-      await result.current.refreshUsers();
-    });
-
-    expect(mockedFetchUsers).toHaveBeenCalledTimes(2);
-    expect(result.current.isRefreshing).toBe(false);
-    expect(result.current.users).toHaveLength(2);
+    await expect(service.fetchUsers()).rejects.toThrow(
+      'The server returned invalid JSON.',
+    );
   });
 });

@@ -1,6 +1,7 @@
 
-import { fetchUsers } from './userService';
+import { UserApiService } from './userService';
 import type { ApiUser } from '../../domain/models/ApiUser';
+import type { HttpClient } from '@/network/HttpClient';
 
 const mockUsers = [
   {
@@ -28,65 +29,79 @@ const mockUsers = [
   },
 ] satisfies ApiUser[];
 
-describe('fetchUsers', () => {
+describe('UserApiService', () => {
+  let httpClient: jest.Mocked<HttpClient>;
+  let service: UserApiService;
+
+  beforeEach(() => {
+    httpClient = {
+      request: jest.fn(),
+      get: jest.fn(),
+      post: jest.fn(),
+      put: jest.fn(),
+      patch: jest.fn(),
+      delete: jest.fn(),
+    };
+
+    service = new UserApiService(httpClient);
+  });
+
   afterEach(() => {
-    jest.restoreAllMocks();
+    jest.clearAllMocks();
   });
 
   it('returns users when the API request succeeds', async () => {
-   jest.spyOn(globalThis, 'fetch').mockResolvedValue({
-      ok: true,
-      json: jest.fn().mockResolvedValue(mockUsers),
-    } as unknown as Response);
+    httpClient.request.mockResolvedValue(mockUsers);
 
-    await expect(fetchUsers()).resolves.toEqual(mockUsers);
+    await expect(service.fetchUsers()).resolves.toEqual(mockUsers);
+
+    expect(httpClient.request).toHaveBeenCalledWith({
+      method: 'GET',
+      path: '/users',
+      signal: undefined,
+    });
   });
 
-  it('passes the AbortSignal to fetch', async () => {
+  it('passes the AbortSignal to the HTTP client', async () => {
     const controller = new AbortController();
+    httpClient.request.mockResolvedValue(mockUsers);
 
-    const fetchMock = jest.spyOn(globalThis, 'fetch').mockResolvedValue({
-      ok: true,
-      json: jest.fn().mockResolvedValue(mockUsers),
-    } as unknown as Response);
+    await service.fetchUsers(controller.signal);
 
-    await fetchUsers(controller.signal);
-
-    expect(fetchMock).toHaveBeenCalledWith(
-      'https://jsonplaceholder.typicode.com/users',
-      { signal: controller.signal },
-    );
+    expect(httpClient.request).toHaveBeenCalledWith({
+      method: 'GET',
+      path: '/users',
+      signal: controller.signal,
+    });
   });
 
-  it('throws a friendly error when the network request fails', async () => {
-    jest.spyOn(globalThis, 'fetch').mockRejectedValue(
+  it('propagates a network error', async () => {
+    httpClient.request.mockRejectedValue(
       new Error('Network request failed'),
     );
 
-    await expect(fetchUsers()).rejects.toThrow(
-      'Unable to connect. Please check your internet connection and try again.',
+    await expect(service.fetchUsers()).rejects.toThrow(
+      'Network request failed',
     );
   });
 
-  it('throws an error when the server returns a non-success status', async () => {
-    jest.spyOn(globalThis, 'fetch').mockResolvedValue({
-      ok: false,
-      status: 500,
-    } as Response);
+  it('propagates an HTTP error', async () => {
+    httpClient.request.mockRejectedValue(
+      new Error('HTTP 500: Internal Server Error'),
+    );
 
-    await expect(fetchUsers()).rejects.toThrow(
-      'Unable to load users. Server returned status 500. Please try again.',
+    await expect(service.fetchUsers()).rejects.toThrow(
+      'HTTP 500: Internal Server Error',
     );
   });
 
-  it('throws an error when the response JSON cannot be parsed', async () => {
-   jest.spyOn(globalThis, 'fetch').mockResolvedValue({
-      ok: true,
-      json: jest.fn().mockRejectedValue(new Error('Invalid JSON')),
-    } as unknown as Response);
+  it('propagates an invalid JSON response error', async () => {
+    httpClient.request.mockRejectedValue(
+      new Error('The server returned invalid JSON.'),
+    );
 
-    await expect(fetchUsers()).rejects.toThrow(
-      'The server returned an invalid response. Please try again later.',
+    await expect(service.fetchUsers()).rejects.toThrow(
+      'The server returned invalid JSON.',
     );
   });
 });
