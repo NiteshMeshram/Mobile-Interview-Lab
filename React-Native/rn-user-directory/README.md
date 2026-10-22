@@ -159,6 +159,9 @@ The structure above reflects the current implementation. Additional layers, such
 - [x] **Phase 8:** Error handling, retry, and performance optimization
 - [x] **Phase 9:** Accessibility, dark mode, and offline considerations
 - [x] **Phase 10:** Unit tests, component tests, linting, and CI/CD
+- [x] **Networking Layer 11:** Reusable `HttpClient` interface, `FetchHttpClient` implementation, centralized API configuration, standardized errors, and `UserApiService` integration.
+- [x] **Networking Service Tests 12:** Five passing unit tests covering successful retrieval, cancellation-signal forwarding, and error propagation.
+- [ ] **Dedicated HTTP Client Tests:** Deferred.
 
 ### Phase 8: Error Handling and Performance
 
@@ -260,3 +263,80 @@ npx expo lint
 ## Related Documentation
 
 See the [Mobile-Interview-Lab root README](../../README.md) for the shared roadmap, cross-platform feature requirements, and progress across iOS, Android, Flutter, and React Native.
+
+## Networking
+
+The application uses a reusable TypeScript networking layer built on the Fetch API. It separates HTTP communication, API configuration, error handling, and feature-specific API services.
+
+### Architecture
+
+```text
+User ViewModel
+      |
+      v
+UserApiService
+      |
+      v
+HttpClient (interface)
+      |
+      v
+FetchHttpClient
+      |
+      v
+REST API
+```
+
+### Configuration
+
+The API endpoint and request timeout are configured in `src/config/apiConfig.ts`.
+
+```typescript
+export const apiConfig = {
+  baseUrl: 'https://jsonplaceholder.typicode.com',
+  timeoutMs: 15000,
+} as const;
+```
+
+### Directory Structure
+
+```text
+src/
+├── config/
+│   └── apiConfig.ts
+├── network/
+│   ├── ApiError.ts
+│   ├── FetchHttpClient.ts
+│   ├── HttpClient.ts
+│   └── httpTypes.ts
+└── features/
+    └── users/
+        └── data/
+            └── services/
+                └── userService.ts
+```
+
+### Components and Responsibilities
+
+- **`apiConfig.ts`** — Centralizes the API base URL and request timeout.
+- **`HttpClient.ts`** — Defines the HTTP client interface and supported request methods.
+- **`FetchHttpClient.ts`** — Implements HTTP requests using the Fetch API.
+- **`httpTypes.ts`** — Defines shared HTTP methods, request options, query parameters, and API error details.
+- **`ApiError.ts`** — Provides a standardized error type for API and network failures.
+- **`userService.ts`** — Implements `UserApiService` for user-related API operations through the `HttpClient` abstraction.
+
+### Features
+
+- Supports GET, POST, PUT, PATCH, and DELETE requests.
+- Centralizes API configuration and request handling.
+- Supports query parameters, request bodies, custom headers, and cancellation signals.
+- Handles request timeouts and cancellation.
+- Standardizes errors for HTTP failures, network failures, invalid JSON responses, timeouts, and cancelled requests.
+- Separates API services from the underlying HTTP implementation.
+- Supports dependency injection through the `HttpClient` interface, making services easier to unit test.
+
+### Testing
+
+- `UserApiService` unit tests cover successful responses, cancellation-signal forwarding, and error propagation.
+- Five service tests are passing.
+- Dedicated `FetchHttpClient` unit tests are deferred.
+
