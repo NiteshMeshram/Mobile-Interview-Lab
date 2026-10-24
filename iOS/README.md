@@ -190,6 +190,7 @@ When logging out, the expected behavior is to cancel scheduled refresh work, rem
 ## API endpoints
 
 Base URL: `https://dummyjson.com`
+API: https://dummyjson.com/docs/auth#auth-login (username: 'emilys', password: 'emilyspass')
 
 | Operation | HTTP method | Endpoint |
 |---|---|---|
