@@ -69,3 +69,6 @@ xcshareddata/WorkspaceSettings.xcsettings
 # SwiftLint / SwiftFormat cache
 .swiftlint-cache
 .swiftformat.cache
+
+# Xcode user-specific workspace state
+**/xcuserdata/
