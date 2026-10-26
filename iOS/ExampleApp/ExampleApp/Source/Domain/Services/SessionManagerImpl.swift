@@ -9,6 +9,7 @@ final class SessionManagerImpl: SessionManager, ObservableObject {
     private let tokenStorage: TokenStorage
     private let tokenValidator: TokenValidator
     private let tokenRefreshCoordinator: TokenRefreshCoordinator
+    private var sessionGeneration = 0
 
     init(
         tokenStorage: TokenStorage,
@@ -44,19 +45,27 @@ final class SessionManagerImpl: SessionManager, ObservableObject {
     }
 
     func logout() throws {
+        sessionGeneration += 1
         try tokenStorage.deleteToken()
         authenticationState = .unauthenticated
     }
 
     private func refreshSession(with token: AuthToken) {
+        let generation = sessionGeneration
+
         print("SESSION: Access token expired. Starting refresh...")
+
         Task {
             do {
                 let newToken = try await tokenRefreshCoordinator.refresh(
                     using: token.refreshToken
                 )
 
-                try tokenStorage.saveToken(newToken)
+                // Ignore results from an outdated session.
+                guard generation == sessionGeneration else {
+                    print("SESSION: Ignoring stale refresh result")
+                    return
+                }
 
                 guard tokenValidator.isValid(newToken.accessToken) else {
                     print("SESSION: Refreshed access token is invalid")
@@ -64,10 +73,16 @@ final class SessionManagerImpl: SessionManager, ObservableObject {
                     return
                 }
 
+                try tokenStorage.saveToken(newToken)
                 authenticationState = .authenticated
-                print("SESSION: Refreshed token saved successfully")
 
+                print("SESSION: Refreshed token saved successfully")
             } catch {
+                guard generation == sessionGeneration else {
+                    print("SESSION: Ignoring stale refresh error")
+                    return
+                }
+
                 print("SESSION: Token refresh failed: \(error)")
                 authenticationState = .unauthenticated
             }

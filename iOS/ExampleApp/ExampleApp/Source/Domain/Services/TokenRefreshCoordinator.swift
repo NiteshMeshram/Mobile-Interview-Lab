@@ -4,7 +4,16 @@ import Foundation
 actor TokenRefreshCoordinator {
 
     // MARK: - Properties
-    private var refreshTask: Task<AuthToken, Error>?
+    private struct InFlightRefresh {
+        let id: UUID
+        let task: Task<AuthToken, Error>
+    }
+
+    private var inFlightRefresh: InFlightRefresh?
+    private var waitingCallerCount = 0
+
+    private var waitingCallersContinuation:
+    CheckedContinuation<Void, Never>?
 
     private let authRepository: AuthRepository
 
@@ -13,33 +22,58 @@ actor TokenRefreshCoordinator {
     }
 
     func refresh(using refreshToken: String) async throws -> AuthToken {
+        if let inFlight = inFlightRefresh {
+            waitingCallerCount += 1
 
-        if let refreshTask {
+            if waitingCallerCount == 2 {
+                waitingCallersContinuation?.resume()
+                waitingCallersContinuation = nil
+            }
+
             print("🔄 TOKEN REFRESH: Waiting for existing refresh...")
-            return try await refreshTask.value
+
+            defer {
+                waitingCallerCount -= 1
+            }
+
+            return try await inFlight.task.value
         }
 
         print("🔄 TOKEN REFRESH: Starting refresh...")
 
+        let id = UUID()
         let task = Task {
             try await authRepository.refreshToken(
                 refreshToken: refreshToken
             )
         }
 
-        refreshTask = task
-
-        defer {
-            refreshTask = nil
-        }
+        inFlightRefresh = InFlightRefresh(id: id, task: task)
 
         do {
             let token = try await task.value
-            refreshTask = nil
+
+            if inFlightRefresh?.id == id {
+                inFlightRefresh = nil
+            }
+
             return token
         } catch {
-            refreshTask = nil
+            if inFlightRefresh?.id == id {
+                inFlightRefresh = nil
+            }
+
             throw error
+        }
+    }
+
+    func waitForWaitingCallers(_ count: Int) async {
+        guard waitingCallerCount < count else {
+            return
+        }
+
+        await withCheckedContinuation { continuation in
+            waitingCallersContinuation = continuation
         }
     }
 }
