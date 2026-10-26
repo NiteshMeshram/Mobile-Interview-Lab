@@ -24,7 +24,6 @@ struct ExampleApp: App {
             wrappedValue: SessionManagerImpl(
                 tokenStorage: tokenStorage,
                 tokenValidator: tokenValidator,
-                authRepository: authRepository,
                 tokenRefreshCoordinator: tokenRefreshCoordinator
             )
         )

@@ -8,18 +8,15 @@ final class SessionManagerImpl: SessionManager, ObservableObject {
 
     private let tokenStorage: TokenStorage
     private let tokenValidator: TokenValidator
-    private let authRepository: AuthRepository
     private let tokenRefreshCoordinator: TokenRefreshCoordinator
 
     init(
         tokenStorage: TokenStorage,
         tokenValidator: TokenValidator,
-        authRepository: AuthRepository,
         tokenRefreshCoordinator: TokenRefreshCoordinator
     ) {
         self.tokenStorage = tokenStorage
         self.tokenValidator = tokenValidator
-        self.authRepository = authRepository
         self.tokenRefreshCoordinator = tokenRefreshCoordinator
     }
 
@@ -55,16 +52,23 @@ final class SessionManagerImpl: SessionManager, ObservableObject {
         print("SESSION: Access token expired. Starting refresh...")
         Task {
             do {
-                let newToken = try await authRepository.refreshToken(
-                    refreshToken: token.refreshToken
+                let newToken = try await tokenRefreshCoordinator.refresh(
+                    using: token.refreshToken
                 )
 
                 try tokenStorage.saveToken(newToken)
 
+                guard tokenValidator.isValid(newToken.accessToken) else {
+                    print("SESSION: Refreshed access token is invalid")
+                    authenticationState = .unauthenticated
+                    return
+                }
+
                 authenticationState = .authenticated
+                print("SESSION: Refreshed token saved successfully")
 
             } catch {
-                try? tokenStorage.deleteToken()
+                print("SESSION: Token refresh failed: \(error)")
                 authenticationState = .unauthenticated
             }
         }
