@@ -5,6 +5,7 @@ import ExampleSPM
 struct ExampleApp: App {
 
     @StateObject private var sessionManager: SessionManagerImpl
+    private let authenticatedAPIClient: AuthenticatedAPIClient
 
     init() {
         let tokenStorage = KeychainTokenStorage()
@@ -19,6 +20,15 @@ struct ExampleApp: App {
         let tokenRefreshCoordinator = TokenRefreshCoordinator(
             authRepository: authRepository
         )
+
+        let client = AuthenticatedAPIClient(
+            apiClient: apiClient,
+            tokenStorage: tokenStorage,
+            tokenValidator: tokenValidator,
+            tokenRefreshCoordinator: tokenRefreshCoordinator
+        )
+
+        self.authenticatedAPIClient = client
 
         _sessionManager = StateObject(
             wrappedValue: SessionManagerImpl(
@@ -35,7 +45,7 @@ struct ExampleApp: App {
             Group {
                 switch sessionManager.authenticationState {
                 case .authenticated:
-                    AuthenticatedView()
+                    AuthenticatedView(authenticatedAPIClient: authenticatedAPIClient)
                 case .unauthenticated:
                     LoginView(sessionManager: sessionManager)
                 case .checking:
