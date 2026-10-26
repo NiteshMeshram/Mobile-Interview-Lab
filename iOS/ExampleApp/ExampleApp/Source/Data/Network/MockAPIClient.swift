@@ -2,16 +2,20 @@
 import Foundation
 struct MockAPIClient: APIClientProtocol {
     var responseData: Data?
+    var statusCode: Int = 200
 
     func sendRequest(
         _ request: URLRequest
-    ) async throws -> Data {
+    ) async throws -> APIResponse {
 
         guard let responseData else {
             throw URLError(.badServerResponse)
         }
 
-        return responseData
+        return APIResponse(
+            data: responseData,
+            statusCode: statusCode
+        )
     }
 }
 

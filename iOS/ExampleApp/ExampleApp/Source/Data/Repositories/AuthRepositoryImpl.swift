@@ -24,11 +24,10 @@ struct AuthRepositoryImpl: AuthRepository {
             body: loginDTO
         )
 
-        let data = try await apiClient.sendRequest(request)
-
+        let response = try await apiClient.sendRequest(request)
         let responseDTO = try JSONDecoder().decode(
             LoginResponseDTO.self,
-            from: data
+            from: response.data
         )
 
         return responseDTO.toEntity()
@@ -41,11 +40,10 @@ struct AuthRepositoryImpl: AuthRepository {
             expiresInMins: 30)
         let request = try requestBuilder.buildRequest(endpoint: .refresh, body: refreshDTO)
 
-        let data = try await apiClient.sendRequest(request)
-
+        let response = try await apiClient.sendRequest(request)
         let responseDTO = try JSONDecoder().decode(
             RefreshTokenResponseDTO.self,
-            from: data
+            from: response.data
         )
 
         return responseDTO.toEntity()
