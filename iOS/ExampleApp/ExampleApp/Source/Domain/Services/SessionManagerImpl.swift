@@ -44,17 +44,6 @@ final class SessionManagerImpl: SessionManager, ObservableObject {
     func login(with token: AuthToken) throws {
         try tokenStorage.saveToken(token)
         authenticationState = .authenticated
-
-        if let expirationDate = tokenValidator.expirationDate(
-            for: token.accessToken
-        ) {
-            Task {
-                await tokenRefreshCoordinator.scheduleRefresh(
-                    for: token,
-                    expirationDate: expirationDate
-                )
-            }
-        }
     }
 
     func logout() throws {

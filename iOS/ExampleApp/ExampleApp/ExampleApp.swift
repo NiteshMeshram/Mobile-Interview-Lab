@@ -17,9 +17,7 @@ struct ExampleApp: App {
         )
 
         let tokenRefreshCoordinator = TokenRefreshCoordinator(
-            authRepository: authRepository,
-            tokenStorage: tokenStorage,
-            tokenValidator: tokenValidator
+            authRepository: authRepository
         )
 
         _sessionManager = StateObject(
