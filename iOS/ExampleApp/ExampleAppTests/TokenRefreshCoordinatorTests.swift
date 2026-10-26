@@ -99,7 +99,7 @@ struct TokenRefreshCoordinatorTests {
 }
 
 
-private actor MockAuthRepository: AuthRepository {
+actor MockAuthRepository: AuthRepository {
     private let tokenToReturn: AuthToken
     private(set) var refreshCallCount = 0
     private var shouldSuspendNextRefresh = false

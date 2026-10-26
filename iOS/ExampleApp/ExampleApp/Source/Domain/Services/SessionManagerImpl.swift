@@ -28,10 +28,10 @@ final class SessionManagerImpl: SessionManager, ObservableObject {
                 return
             }
 
-            if tokenValidator.isValid(token.accessToken) {
-                authenticationState = .authenticated
-            } else {
+            if tokenValidator.needsRefresh(token.accessToken, skew: 60) {
                 refreshSession(with: token)
+            } else {
+                authenticationState = .authenticated
             }
 
         } catch {

@@ -64,5 +64,16 @@ struct JWTTokenValidator: TokenValidator {
 
         return Date(timeIntervalSince1970: expiration)
     }
+
+    nonisolated func needsRefresh(
+        _ accessToken: String,
+        skew: TimeInterval = 60
+    ) -> Bool {
+        guard let expirationDate = expirationDate(for: accessToken) else {
+            return true
+        }
+
+        return expirationDate.timeIntervalSinceNow <= skew
+    }
 }
 
