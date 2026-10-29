@@ -12,7 +12,7 @@ extension APIEndpoint {
         case .login:
             return "/auth/login"
         case .currentuser:
-            return "/currentuser"
+            return "/auth/me"
         case .refresh:
             return "/auth/refresh"
         }

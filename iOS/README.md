@@ -45,6 +45,7 @@ Source/
 │   │       ├── HTTPMethod.swift
 │   │       ├── MockAPIClient.swift
 │   │       └── RequestBuilder.swift
+│   │       └── AuthenticatedAPIClient.swift
 │   ├── Repositories/
 │   │   └── AuthRepositoryImpl.swift
 │   └── Storage/
@@ -133,6 +134,8 @@ These are the intended roles implied by the file names and architecture; confirm
 
 ## Authentication flow
 
+## Authentication flow
+
 ### 1. Login
 
 1. The user enters credentials in `LoginView`.
@@ -145,18 +148,18 @@ These are the intended roles implied by the file names and architecture; confirm
 
 ### 2. Session restoration
 
-When the app starts, the session manager can check whether a saved token exists and whether it is still valid.
+When the app starts, the session manager checks whether a saved token exists and whether it needs refreshing.
 
-- If the access token is valid, restore the authenticated session.
-- If it is expired and a refresh token is available, attempt a refresh.
-- If refresh succeeds, save the new token and continue the session.
-- If a valid session cannot be established, show the login screen.
+- If the access token does not need refreshing, restore the authenticated session.
+- If the access token is expired or nearing expiry, attempt a refresh using the refresh token.
+- If refresh succeeds, save the new token and restore the authenticated session.
+- If refresh fails, transition to the unauthenticated state.
 
-The precise behavior depends on the conditions handled in `SessionManagerImpl`.
+### 3. Automatic and on-demand token refresh
 
-### 3. Automatic token refresh
+`SessionManagerImpl` checks token expiry during session restoration, using a 60-second refresh buffer. `AuthenticatedAPIClient` also handles HTTP `401 Unauthorized` responses by coordinating a token refresh and retrying the original request once with the refreshed access token.
 
-The refresh coordinator/session manager coordinates refresh timing using the token expiry and the configured refresh buffer. On a successful refresh, the app saves the returned token and schedules the next refresh.
+`TokenRefreshCoordinator` shares an in-flight refresh operation among concurrent callers to help prevent duplicate refresh requests. The refreshed token is saved for subsequent requests.
 
 Observed development log:
 
