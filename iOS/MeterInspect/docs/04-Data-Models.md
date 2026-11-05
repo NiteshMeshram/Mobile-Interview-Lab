@@ -1,0 +1,1 @@
+Customer, Meter, Inspection and status lifecycle
