@@ -1,0 +1,1 @@
+Queue, retries, idempotency and synchronization
