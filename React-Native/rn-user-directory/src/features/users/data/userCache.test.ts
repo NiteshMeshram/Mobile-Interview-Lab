@@ -16,12 +16,8 @@ const mockUsers = [
   {
     id: 1,
     name: 'Leanne Graham',
-    username: 'Bret',
     email: 'leanne@example.com',
     city: 'Gwenborough',
-    phone: '1-770-736-8031',
-    website: 'hildegard.org',
-    company: 'Romaguera-Crona',
     avatarUrl: 'https://example.com/avatar.png',
   },
 ] as User[];
