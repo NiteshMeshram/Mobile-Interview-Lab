@@ -340,3 +340,8 @@ src/
 - Five service tests are passing.
 - Dedicated `FetchHttpClient` unit tests are deferred.
 
+## Development Roadmap
+
+See [ROADMAP.md](./ROADMAP.md) for the complete implementation
+plan, phase-wise status, acceptance criteria, and separate POCs.
+
