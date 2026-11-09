@@ -1,0 +1,1 @@
+MVVM, Clean Architecture, layers and dependency flow
