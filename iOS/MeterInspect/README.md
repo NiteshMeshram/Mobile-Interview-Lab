@@ -4,6 +4,10 @@
 
 MeterInspect is a SwiftUI-based iOS POC designed for field employees who inspect electricity meters, capture readings and videos, and synchronize inspection data when internet connectivity becomes available.
 
+## Architecture & Project Structure
+
+![MeterInspect Architecture](docs/architecture/project-structure.png)
+
 ## Key Features
 
 - Create and manage electricity meter inspections.
