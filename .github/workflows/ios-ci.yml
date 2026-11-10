@@ -2,28 +2,10 @@
 name: iOS CI
 
 on:
-  push:
-    branches:
-      - "**"
-    paths:
-      - "iOS/MeterInspect/**"
-      - ".github/workflows/ios-ci.yml"
-
-  pull_request:
-    branches:
-      - main
-    paths:
-      - "iOS/MeterInspect/**"
-      - ".github/workflows/ios-ci.yml"
-
-  workflow_dispatch:
+  workflow_call:
 
 permissions:
   contents: read
-
-concurrency:
-  group: ios-ci-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
 
 jobs:
   build-and-test:

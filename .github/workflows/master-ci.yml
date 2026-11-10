@@ -1,0 +1,86 @@
+
+name: Master CI
+
+on:
+  push:
+    branches:
+      - "**"
+
+  pull_request:
+    branches:
+      - main
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: master-ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  detect-changes:
+    name: Detect Platform Changes
+    runs-on: ubuntu-latest
+
+    outputs:
+      ios: ${{ steps.filter.outputs.ios }}
+      android: ${{ steps.filter.outputs.android }}
+      flutter: ${{ steps.filter.outputs.flutter }}
+      react-native: ${{ steps.filter.outputs.react-native }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect changed platform directories
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            ios:
+              - 'iOS/**'
+
+            android:
+              - 'Android/**'
+
+            flutter:
+              - 'Flutter/**'
+
+            react-native:
+              - 'React-Native/**'
+
+  ios-ci:
+    name: iOS CI
+    needs: detect-changes
+    if: needs.detect-changes.outputs.ios == 'true'
+    uses: ./.github/workflows/ios-ci.yml
+    permissions:
+      contents: read
+
+  android-ci:
+    name: Android CI
+    needs: detect-changes
+    if: needs.detect-changes.outputs.android == 'true'
+    uses: ./.github/workflows/android-ci.yml
+    permissions:
+      contents: read
+
+  flutter-ci:
+    name: Flutter CI
+    needs: detect-changes
+    if: needs.detect-changes.outputs.flutter == 'true'
+    uses: ./.github/workflows/flutter-ci.yml
+    permissions:
+      contents: read
+
+  react-native-ci:
+    name: React Native CI
+    needs: detect-changes
+    if: needs.detect-changes.outputs.react-native == 'true'
+    uses: ./.github/workflows/react-native-ci.yml
+    permissions:
+      contents: read
