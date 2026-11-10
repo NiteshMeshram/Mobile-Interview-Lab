@@ -96,7 +96,6 @@ struct InspectionFormView: View {
                 }
             }
         }
-        
 
         .alert(
             "Unable to Save Inspection",
