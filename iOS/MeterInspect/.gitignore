@@ -1,4 +1,3 @@
-
 # macOS
 .DS_Store
 
@@ -22,6 +21,3 @@ Package.resolved
 # Temporary files
 *.tmp
 *.log
-
-**/xcuserdata/
-**/*.xcuserstate
