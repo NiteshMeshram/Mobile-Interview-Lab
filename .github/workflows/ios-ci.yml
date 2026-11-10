@@ -1,0 +1,67 @@
+
+name: iOS CI
+
+on:
+  push:
+    branches:
+      - "**"
+    paths:
+      - "iOS/MeterInspect/**"
+      - ".github/workflows/ios-ci.yml"
+
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "iOS/MeterInspect/**"
+      - ".github/workflows/ios-ci.yml"
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ios-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    name: Build and Test MeterInspect
+    runs-on: macos-latest
+    timeout-minutes: 30
+
+    defaults:
+      run:
+        working-directory: iOS/MeterInspect
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Show Xcode version
+        run: |
+          xcodebuild -version
+          xcrun simctl list devices available
+
+      - name: Resolve Swift Package dependencies
+        run: |
+          xcodebuild -resolvePackageDependencies \
+            -project MeterInspect.xcodeproj \
+            -scheme MeterInspect
+
+      - name: Build MeterInspect
+        run: |
+          xcodebuild build \
+            -project MeterInspect.xcodeproj \
+            -scheme MeterInspect \
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Run unit tests
+        run: |
+          xcodebuild test \
+            -project MeterInspect.xcodeproj \
+            -scheme MeterInspect \
+            -destination 'platform=iOS Simulator,name=iPhone 17' \
+            CODE_SIGNING_ALLOWED=NO
