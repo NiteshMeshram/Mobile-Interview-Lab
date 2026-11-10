@@ -1,6 +1,6 @@
 import Foundation
 
-struct Inspection {
+struct Inspection: Identifiable {
     let id: UUID
     let meterID: UUID
     var readings: Decimal
