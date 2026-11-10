@@ -1,0 +1,93 @@
+
+name: Master CI
+
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+    branches:
+      - main
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: master-ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  detect-changes:
+    name: Detect Platform Changes
+    runs-on: ubuntu-latest
+
+    outputs:
+      ios: ${{ steps.filter.outputs.ios }}
+      react-native: ${{ steps.filter.outputs.react-native }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect changed platforms
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            ios:
+              - 'iOS/**'
+              - '.github/workflows/ios-ci.yml'
+
+            react-native:
+              - 'React-Native/**'
+
+  ios-ci:
+    name: iOS CI
+    needs: detect-changes
+    if: needs.detect-changes.outputs.ios == 'true'
+    uses: ./.github/workflows/ios-ci.yml
+    permissions:
+      contents: read
+
+  react-native-ci:
+    name: React Native CI
+    needs: detect-changes
+    if: needs.detect-changes.outputs.react-native == 'true'
+    uses: ./.github/workflows/react-native-ci.yml
+    permissions:
+      contents: read
+
+  ci-gate:
+    name: CI Gate
+    runs-on: ubuntu-latest
+    needs:
+      - detect-changes
+      - ios-ci
+      - react-native-ci
+    if: always()
+
+    steps:
+      - name: Verify applicable platform checks
+        run: |
+          if [[ "${{ needs.detect-changes.result }}" != "success" ]]; then
+            echo "Platform change detection failed."
+            exit 1
+          fi
+
+          if [[ "${{ needs.ios-ci.result }}" == "failure" || "${{ needs.ios-ci.result }}" == "cancelled" ]]; then
+            echo "iOS CI did not pass."
+            exit 1
+          fi
+
+          if [[ "${{ needs.react-native-ci.result }}" == "failure" || "${{ needs.react-native-ci.result }}" == "cancelled" ]]; then
+            echo "React Native CI did not pass."
+            exit 1
+          fi
+
+          echo "All applicable CI checks passed."

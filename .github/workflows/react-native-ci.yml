@@ -2,15 +2,10 @@
 name: React Native CI
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - "React-Native/rn-user-directory/**"
-      - ".github/workflows/react-native-ci.yml"
-  pull_request:
-    branches:
-      - main
+  workflow_call:
+
+permissions:
+  contents: read
 
 jobs:
   validate:
