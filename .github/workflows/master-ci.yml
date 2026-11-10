@@ -42,6 +42,7 @@ jobs:
           filters: |
             ios:
               - 'iOS/**'
+              - '.github/workflows/ios-ci.yml'
 
             react-native:
               - 'React-Native/**'
