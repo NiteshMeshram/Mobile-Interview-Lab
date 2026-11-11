@@ -1,4 +1,5 @@
 
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -8,20 +9,19 @@ import {
   Text,
   View,
 } from 'react-native';
-import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 
-import type { User } from '../../features/users/domain/models/User';
 import { mapApiUserToUser } from '../../features/users/data/mappers/userMapper';
-import { FetchHttpClient } from '../../network/FetchHttpClient';
 import { UserApiService } from '../../features/users/data/services/userService';
+import type { User } from '../../features/users/domain/models/User';
+import { FetchHttpClient } from '../../network/FetchHttpClient';
 
 import {
   getCachedUserById,
   setCachedUsers,
 } from '../../features/users/data/userCache';
 
-import { useAppTheme } from '../../theme/useAppTheme';
 import type { AppColors } from '../../theme/colors';
+import { useAppTheme } from '../../theme/useAppTheme';
 
 const httpClient = new FetchHttpClient();
 const userApiService = new UserApiService(httpClient);
@@ -84,7 +84,6 @@ export default function UserDetailsScreen() {
         }
       }
     }
-
 
     void loadUser();
 
