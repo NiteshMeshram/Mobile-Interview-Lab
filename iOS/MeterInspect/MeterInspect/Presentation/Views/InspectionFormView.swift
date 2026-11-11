@@ -13,15 +13,6 @@ struct InspectionFormView: View {
     @State private var isSaving = false
     @State private var validationError: String?
 
-
-    // MARK: - Initialization
-
-    // MARK: - Lifecycle
-
-    // MARK: - Actions
-
-    // MARK: - Private Methods
-
     @MainActor
     private func saveInspection() async {
         guard let meterUUID = UUID(uuidString: meterID) else {
