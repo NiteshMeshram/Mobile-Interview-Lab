@@ -26,6 +26,15 @@ jobs:
           xcodebuild -version
           xcrun simctl list devices available
 
+      - name: Check simulator and runner
+        run: |
+          echo "Runner memory:"
+          memory_pressure
+          echo "Disk space:"
+          df -h
+          echo "Available simulators:"
+          xcrun simctl list devices available
+
       - name: Resolve Swift Package dependencies
         run: |
           xcodebuild -resolvePackageDependencies \
