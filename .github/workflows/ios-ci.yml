@@ -26,6 +26,15 @@ jobs:
           xcodebuild -version
           xcrun simctl list devices available
 
+      - name: Check simulator and runner
+        run: |
+          echo "Runner memory:"
+          memory_pressure
+          echo "Disk space:"
+          df -h
+          echo "Available simulators:"
+          xcrun simctl list devices available
+
       - name: Resolve Swift Package dependencies
         run: |
           xcodebuild -resolvePackageDependencies \
@@ -41,9 +50,11 @@ jobs:
             CODE_SIGNING_ALLOWED=NO
 
       - name: Run unit tests
+        timeout-minutes: 20
         run: |
           xcodebuild test \
             -project MeterInspect.xcodeproj \
             -scheme MeterInspect \
             -destination 'platform=iOS Simulator,name=iPhone 17' \
+            -parallel-testing-enabled NO \
             CODE_SIGNING_ALLOWED=NO

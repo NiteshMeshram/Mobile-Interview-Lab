@@ -26,8 +26,10 @@ struct MeterInspectApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView(
-                modelContext: sharedModelContainer.mainContext
+            InspectionListView(
+                repository: SwiftDataInspectionRepository(
+                    modelContext: sharedModelContainer.mainContext
+                )
             )
         }
         .modelContainer(sharedModelContainer)
