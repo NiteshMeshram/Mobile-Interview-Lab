@@ -1,17 +1,25 @@
 import SwiftUI
 import SwiftData
 
-import SwiftUI
 
 struct InspectionListView: View {
     // MARK: - ViewModel
 
     @StateObject private var viewModel: InspectionListViewModel
     @State private var showingInspectionForm = false
+    private let customerRepository: CustomerRepository
+    private let meterRepository: MeterRepository
 
     // MARK: - Initialization
 
-    init(repository: InspectionRepository) {
+    init(
+        repository: InspectionRepository,
+        customerRepository: CustomerRepository,
+        meterRepository: MeterRepository
+    ) {
+        self.customerRepository = customerRepository
+        self.meterRepository = meterRepository
+
         _viewModel = StateObject(
             wrappedValue: InspectionListViewModel(
                 repository: repository
@@ -68,7 +76,11 @@ struct InspectionListView: View {
             }
         }
         .sheet(isPresented: $showingInspectionForm) {
-            InspectionFormView(viewModel: viewModel)
+            InspectionFormView(
+                viewModel: viewModel,
+                customerRepository: customerRepository,
+                meterRepository: meterRepository
+            )
         }
         .task {
             await viewModel.loadInspections()
@@ -80,13 +92,25 @@ struct InspectionListView: View {
 
 #Preview {
     let container = try! ModelContainer(
-        for: InspectionEntity.self,
+        for: Schema([
+            InspectionEntity.self,
+            CustomerEntity.self,
+            MeterEntity.self
+        ]),
         configurations: ModelConfiguration(isStoredInMemoryOnly: true)
     )
 
-    let repository = SwiftDataInspectionRepository(
-        modelContext: container.mainContext
-    )
+    let context = container.mainContext
 
-    InspectionListView(repository: repository)
+    InspectionListView(
+        repository: SwiftDataInspectionRepository(
+            modelContext: context
+        ),
+        customerRepository: SwiftDataCustomerRepository(
+            modelContext: context
+        ),
+        meterRepository: SwiftDataMeterRepository(
+            modelContext: context
+        )
+    )
 }
