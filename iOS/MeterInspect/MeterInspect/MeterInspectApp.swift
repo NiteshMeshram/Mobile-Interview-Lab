@@ -38,6 +38,12 @@ struct MeterInspectApp: App {
             InspectionListView(
                 repository: SwiftDataInspectionRepository(
                     modelContext: sharedModelContainer.mainContext
+                ),
+                customerRepository: SwiftDataCustomerRepository(
+                    modelContext: sharedModelContainer.mainContext
+                ),
+                meterRepository: SwiftDataMeterRepository(
+                    modelContext: sharedModelContainer.mainContext
                 )
             )
         }
