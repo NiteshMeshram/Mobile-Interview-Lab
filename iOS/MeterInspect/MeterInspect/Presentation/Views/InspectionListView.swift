@@ -22,7 +22,9 @@ struct InspectionListView: View {
 
         _viewModel = StateObject(
             wrappedValue: InspectionListViewModel(
-                repository: repository
+                repository: repository,
+                customerRepository: customerRepository,
+                meterRepository: meterRepository
             )
         )
     }
@@ -50,8 +52,19 @@ struct InspectionListView: View {
                 } else {
                     List(viewModel.inspections) { inspection in
                         VStack(alignment: .leading, spacing: 6) {
-                            Text("Meter ID: \(inspection.meterID)")
-                                .font(.headline)
+                            Text(
+                                viewModel.customer(for: inspection)?.name
+                                ?? "Unknown Customer"
+                            )
+                            .font(.headline)
+
+                            if let meter = viewModel.meter(for: inspection) {
+                                Text("Meter: \(meter.meterNumber) · \(meter.meterType)")
+                                    .font(.subheadline)
+                            } else {
+                                Text("Meter details unavailable")
+                                    .font(.subheadline)
+                            }
 
                             Text("Reading: \(inspection.readings.description)")
                                 .font(.subheadline)
