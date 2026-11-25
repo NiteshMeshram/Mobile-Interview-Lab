@@ -28,29 +28,12 @@ struct InspectionTests {
 
     @Test
     func invalidStatusTransitionThrowsError() {
-        var inspection = makeInspection()
+        var inspection = makeInspection(status: .completed)
 
         #expect(throws: InspectionError.self) {
-            try inspection.transition(to: .synced)
+            try inspection.transition(to: .draft)
         }
     }
 
-    @Test
-    func failedSyncCanBeRetried() throws {
-        var inspection = makeInspection(status: .syncing)
 
-        try inspection.transition(to: .syncFailed)
-        try inspection.transition(to: .pendingSync)
-
-        #expect(inspection.status == .pendingSync)
-    }
-
-    @Test
-    func syncedInspectionCannotTransitionAgain() {
-        var inspection = makeInspection(status: .synced)
-
-        #expect(throws: InspectionError.self) {
-            try inspection.transition(to: .pendingSync)
-        }
-    }
 }

@@ -7,11 +7,6 @@ struct InspectionStatusTests {
 
     @Test(arguments: [
         (InspectionStatus.draft, InspectionStatus.completed),
-        (.completed, .pendingSync),
-        (.pendingSync, .syncing),
-        (.syncing, .synced),
-        (.syncing, .syncFailed),
-        (.syncFailed, .pendingSync)
     ])
     func canTransition_returnsTrueForValidTransitions(
         from currentStatus: InspectionStatus,
@@ -23,18 +18,7 @@ struct InspectionStatusTests {
     // MARK: - Invalid Transitions
 
     @Test(arguments: [
-        (InspectionStatus.draft, InspectionStatus.pendingSync),
-        (.draft, .syncing),
-        (.draft, .synced),
-        (.completed, .draft),
-        (.completed, .syncing),
-        (.pendingSync, .completed),
-        (.pendingSync, .synced),
-        (.syncing, .pendingSync),
-        (.synced, .syncing),
-        (.synced, .syncFailed),
-        (.syncFailed, .syncing),
-        (.syncFailed, .synced)
+        (InspectionStatus.draft, InspectionStatus.draft)
     ])
     func canTransition_returnsFalseForInvalidTransitions(
         from currentStatus: InspectionStatus,
@@ -48,10 +32,6 @@ struct InspectionStatusTests {
     @Test(arguments: [
         InspectionStatus.draft,
         .completed,
-        .pendingSync,
-        .syncing,
-        .syncFailed,
-        .synced
     ])
     func canTransition_returnsFalseForSameStatus(
         status: InspectionStatus
