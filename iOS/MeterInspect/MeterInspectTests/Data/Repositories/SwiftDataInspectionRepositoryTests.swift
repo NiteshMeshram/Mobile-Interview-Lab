@@ -164,4 +164,120 @@ struct SwiftDataInspectionRepositoryTests {
         #expect(result?.readings == inspection.readings)
         #expect(result?.status == inspection.status)
     }
+
+    @Test
+    func fetchReturnsNilForMissingInspection() async throws {
+        let (repository, container) = try makeRepository()
+
+        let result = try await repository.fetch(by: UUID())
+
+        #expect(result == nil)
+        withExtendedLifetime(container) {}
+    }
+
+    @Test
+    func fetchAllReturnsEmptyArrayWhenNoInspectionsExist() async throws {
+        let (repository, container) = try makeRepository()
+
+        let result = try await repository.fetchAll()
+
+        #expect(result.isEmpty)
+        withExtendedLifetime(container) {}
+    }
+
+    @Test
+    func fetchAllSortsInspectionsByDateDescending() async throws {
+        let (repository, container) = try makeRepository()
+
+        let older = Inspection(
+            id: UUID(),
+            meterID: UUID(),
+            readings: 100,
+            inspectionDate: Date(timeIntervalSince1970: 1_700_000_000),
+            videoFilePath: nil,
+            status: .pendingSync
+        )
+
+        let newer = Inspection(
+            id: UUID(),
+            meterID: UUID(),
+            readings: 200,
+            inspectionDate: Date(timeIntervalSince1970: 1_720_000_000),
+            videoFilePath: nil,
+            status: .pendingSync
+        )
+
+        let middle = Inspection(
+            id: UUID(),
+            meterID: UUID(),
+            readings: 150,
+            inspectionDate: Date(timeIntervalSince1970: 1_710_000_000),
+            videoFilePath: nil,
+            status: .pendingSync
+        )
+
+        // Insert in a different order from the expected result.
+        try await repository.add(older)
+        try await repository.add(newer)
+        try await repository.add(middle)
+
+        let result = try await repository.fetchAll()
+
+        #expect(result.count == 3)
+        #expect(result[0].id == newer.id)
+        #expect(result[1].id == middle.id)
+        #expect(result[2].id == older.id)
+
+        withExtendedLifetime(container) {}
+    }
+
+    @Test
+    func updateDoesNothingWhenInspectionDoesNotExist() async throws {
+        let (repository, container) = try makeRepository()
+        let inspection = makeInspection()
+
+        try await repository.update(inspection)
+
+        let result = try await repository.fetch(by: inspection.id)
+
+        #expect(result == nil)
+        withExtendedLifetime(container) {}
+    }
+
+    @Test
+    func deleteDoesNothingWhenInspectionDoesNotExist() async throws {
+        let (repository, container) = try makeRepository()
+
+        try await repository.delete(by: UUID())
+
+        let result = try await repository.fetchAll()
+
+        #expect(result.isEmpty)
+        withExtendedLifetime(container) {}
+    }
+
+    @Test
+    func videoFilePathPersistsCorrectly() async throws {
+        let (repository, container) = try makeRepository()
+
+        let videoPath = "inspections/videos/meter-inspection-001.mp4"
+
+        let inspection = Inspection(
+            id: UUID(),
+            meterID: UUID(),
+            readings: 1250.50,
+            inspectionDate: Date(),
+            videoFilePath: videoPath,
+            status: .pendingSync
+        )
+
+        try await repository.add(inspection)
+
+        let result = try await repository.fetch(by: inspection.id)
+
+        #expect(result?.videoFilePath == videoPath)
+
+        withExtendedLifetime(container) {}
+    }
+
 }
