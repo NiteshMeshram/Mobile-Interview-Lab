@@ -10,6 +10,8 @@ final class InspectionEntity {
     var inspectionDate: Date
     var videoFilePath: String?
     var status: String
+    var metadataSyncStatus: String
+    var videoSyncStatus: String
 
     init(
         id: UUID,
@@ -17,7 +19,9 @@ final class InspectionEntity {
         readings: Decimal,
         inspectionDate: Date,
         videoFilePath: String?,
-        status: String
+        status: String,
+        metadataSyncStatus: String,
+        videoSyncStatus: String
     ) {
         self.id = id
         self.meterID = meterID
@@ -25,5 +29,7 @@ final class InspectionEntity {
         self.inspectionDate = inspectionDate
         self.videoFilePath = videoFilePath
         self.status = status
+        self.metadataSyncStatus = metadataSyncStatus
+        self.videoSyncStatus = videoSyncStatus
     }
 }
