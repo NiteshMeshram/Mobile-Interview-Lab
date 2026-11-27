@@ -90,7 +90,10 @@ struct InspectionListView: View {
             .navigationTitle("Inspections")
             .navigationDestination(isPresented: $showInspectionDetails) {
                 if let selectedInspection {
-                    InspectionDetailView(inspection: selectedInspection)
+                    InspectionDetailView(
+                        inspection: selectedInspection,
+                        videoStorageService: viewModel.videoStorageService
+                    )
                 }
             }
             .toolbar {
@@ -121,7 +124,6 @@ struct InspectionListView: View {
 
     @ViewBuilder
     func inspectionRowContent(inspection: Inspection) -> some View {
-
         VStack(alignment: .leading, spacing: 6) {
             Text(
                 viewModel.customer(for: inspection)?.name

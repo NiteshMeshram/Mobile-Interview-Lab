@@ -11,7 +11,7 @@ final class InspectionListViewModel: ObservableObject {
     @Published private(set) var metersByID: [UUID: Meter] = [:]
     @Published private(set) var isLoading = false
     @Published private(set) var errorMessage: String?
-    private let videoStorageService: VideoStorageService
+    let videoStorageService: VideoStorageService
 
     // MARK: - Dependencies
 
@@ -107,6 +107,8 @@ final class InspectionListViewModel: ObservableObject {
 
         do {
             try await repository.update(inspection)
+            let savedInspection = try await repository.fetch(by: inspectionID)
+            print("ATTACH - After save:", savedInspection?.videoSyncStatus as Any)
 
         } catch {
             // 4. Roll back video storage if persistence fails
@@ -117,5 +119,10 @@ final class InspectionListViewModel: ObservableObject {
         // 5. Refresh inspections list
 
         inspections = try await repository.fetchAll()
+
+        print(
+            "ATTACH - After refresh:",
+            inspections.first(where: { $0.id == inspectionID })?.videoSyncStatus as Any
+        )
     }
 }
