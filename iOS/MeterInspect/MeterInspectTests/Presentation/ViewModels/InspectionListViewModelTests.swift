@@ -52,17 +52,20 @@ struct InspectionListViewModelTests {
     private func makeSUT(
         inspectionRepository: MockInspectionRepository? = nil,
         customerRepository: MockCustomerRepository? = nil,
-        meterRepository: MockMeterRepository? = nil
+        meterRepository: MockMeterRepository? = nil,
+        videoStorageService: MockVideoStorageService? = nil
     ) -> InspectionListViewModel {
 
         let inspectionRepository = inspectionRepository ?? MockInspectionRepository()
         let customerRepository = customerRepository ?? MockCustomerRepository()
         let meterRepository = meterRepository ?? MockMeterRepository()
+        let videoStorageService = videoStorageService ?? MockVideoStorageService()
 
         return InspectionListViewModel(
             repository: inspectionRepository,
             customerRepository: customerRepository,
-            meterRepository: meterRepository
+            meterRepository: meterRepository,
+            videoStorageService: videoStorageService
         )
     }
 

@@ -47,7 +47,8 @@ struct LocalVideoStorageServiceTests {
             for: inspectionID
         )
 
-        #expect(relativePath == "MeterVideos/\(inspectionID.uuidString).mov")
+        #expect(relativePath.hasPrefix("MeterVideos/\(inspectionID.uuidString)_"))
+        #expect(relativePath.hasSuffix(".mov"))
 
         let savedURL = await storage.videoURL(for: relativePath)
 
@@ -79,7 +80,7 @@ struct LocalVideoStorageServiceTests {
     }
 
     @Test
-    func saveVideo_throwsWhenDestinationAlreadyExists() async throws {
+    func saveVideo_allowsMultipleVideosForSameInspection() async throws {
         let directory = try makeTemporaryDirectory()
         defer {
             try? FileManager.default.removeItem(at: directory)
@@ -91,18 +92,24 @@ struct LocalVideoStorageServiceTests {
         )
         let inspectionID = UUID()
 
-        _ = try await storage.saveVideo(
+        let firstPath = try await storage.saveVideo(
             from: sourceURL,
             for: inspectionID
         )
 
-        await #expect(throws: LocalVideoStorageError.fileAlreadyExists) {
-            try await storage.saveVideo(
-                from: sourceURL,
-                for: inspectionID
-            )
-        }
+        let secondPath = try await storage.saveVideo(
+            from: sourceURL,
+            for: inspectionID
+        )
+
+        #expect(firstPath != secondPath)
+        #expect(firstPath.hasPrefix("MeterVideos/\(inspectionID.uuidString)_"))
+        #expect(secondPath.hasPrefix("MeterVideos/\(inspectionID.uuidString)_"))
+
+        #expect(await storage.videoURL(for: firstPath) != nil)
+        #expect(await storage.videoURL(for: secondPath) != nil)
     }
+
 
     // MARK: - Retrieve
 
