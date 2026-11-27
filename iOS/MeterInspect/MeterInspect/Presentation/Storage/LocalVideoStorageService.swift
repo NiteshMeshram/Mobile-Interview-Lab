@@ -29,7 +29,7 @@ struct LocalVideoStorageService : VideoStorageService {
 
         let fileExtension = sourceURL.pathExtension.isEmpty ? "mov" : sourceURL.pathExtension
 
-        let fileName = "\(inspectionID.uuidString).\(fileExtension)"
+        let fileName = "\(inspectionID.uuidString)_\(UUID().uuidString).\(fileExtension)"
         let destinationURL = directoryURL.appendingPathComponent(fileName)
 
         guard !fileManager.fileExists(atPath: destinationURL.path) else {
@@ -125,11 +125,30 @@ struct LocalVideoStorageService : VideoStorageService {
 
 // MARK: - Errors
 
-enum LocalVideoStorageError: Error, Equatable {
+enum LocalVideoStorageError: Error, Equatable, LocalizedError {
     case sourceFileNotFound
     case invalidSourceFile
     case fileAlreadyExists
     case invalidPath
     case storageDirectoryUnavailable
+
+    var errorDescription: String? {
+        switch self {
+        case .sourceFileNotFound:
+            return "Selected source video does not exist."
+
+        case .invalidSourceFile:
+            return "Selected source is not a valid video file."
+
+        case .fileAlreadyExists:
+            return "A video already exists for this inspection."
+
+        case .invalidPath:
+            return "Invalid video storage path."
+
+        case .storageDirectoryUnavailable:
+            return "Application Support directory is unavailable."
+        }
+    }
 }
 

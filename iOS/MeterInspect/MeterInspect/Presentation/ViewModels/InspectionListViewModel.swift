@@ -11,6 +11,7 @@ final class InspectionListViewModel: ObservableObject {
     @Published private(set) var metersByID: [UUID: Meter] = [:]
     @Published private(set) var isLoading = false
     @Published private(set) var errorMessage: String?
+    private let videoStorageService: VideoStorageService
 
     // MARK: - Dependencies
 
@@ -22,10 +23,13 @@ final class InspectionListViewModel: ObservableObject {
 
     init(repository: InspectionRepository,
          customerRepository: CustomerRepository,
-         meterRepository: MeterRepository) {
+         meterRepository: MeterRepository,
+         videoStorageService: VideoStorageService
+    ) {
         self.repository = repository
         self.customerRepository = customerRepository
         self.meterRepository = meterRepository
+        self.videoStorageService = videoStorageService
     }
 
     // MARK: - Actions
@@ -81,6 +85,36 @@ final class InspectionListViewModel: ObservableObject {
         )
 
         try await repository.add(inspection)
+
+        inspections = try await repository.fetchAll()
+    }
+
+    func attachVideo(inspectionID: UUID, sourceURL: URL) async throws {
+
+        guard var inspection = try await repository.fetch(by: inspectionID) else {
+            throw InspectionError.inspectionNotFound
+        }
+
+        // 1. Save video to local storage
+
+        let relativePath = try await videoStorageService.saveVideo(from: sourceURL, for: inspectionID)
+
+        // 2. Update inspection metadata
+        inspection.videoFilePath = relativePath
+        inspection.videoSyncStatus = .pending
+
+        // 3. Persist the updated inspection
+
+        do {
+            try await repository.update(inspection)
+
+        } catch {
+            // 4. Roll back video storage if persistence fails
+            try? await videoStorageService.deleteVideo(at: relativePath)
+            throw error
+        }
+
+        // 5. Refresh inspections list
 
         inspections = try await repository.fetchAll()
     }

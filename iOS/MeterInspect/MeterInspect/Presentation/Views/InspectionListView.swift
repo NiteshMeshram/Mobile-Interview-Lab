@@ -24,7 +24,8 @@ struct InspectionListView: View {
             wrappedValue: InspectionListViewModel(
                 repository: repository,
                 customerRepository: customerRepository,
-                meterRepository: meterRepository
+                meterRepository: meterRepository,
+                videoStorageService: LocalVideoStorageService()
             )
         )
     }
@@ -50,7 +51,7 @@ struct InspectionListView: View {
                         )
                     )
                 } else {
-                    List(viewModel.inspections) { inspection in
+                    List(viewModel.inspections, id: \.id) { inspection in
                         VStack(alignment: .leading, spacing: 6) {
                             Text(
                                 viewModel.customer(for: inspection)?.name
@@ -72,6 +73,15 @@ struct InspectionListView: View {
                             Text(inspection.inspectionDate, style: .date)
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
+
+
+                            VideoPickerView { videoURL in
+                                try await viewModel.attachVideo(
+                                    inspectionID: inspection.id,
+                                    sourceURL: videoURL
+                                )
+                            }
+                            .padding(.top, 8)
                         }
                         .padding(.vertical, 4)
                     }
