@@ -7,6 +7,8 @@ struct InspectionListView: View {
 
     @StateObject private var viewModel: InspectionListViewModel
     @State private var showingInspectionForm = false
+    @State private var selectedInspection: Inspection?
+    @State private var showInspectionDetails = false
     private let customerRepository: CustomerRepository
     private let meterRepository: MeterRepository
 
@@ -52,45 +54,48 @@ struct InspectionListView: View {
                     )
                 } else {
                     List(viewModel.inspections, id: \.id) { inspection in
-                        VStack(alignment: .leading, spacing: 6) {
-                            Text(
-                                viewModel.customer(for: inspection)?.name
-                                ?? "Unknown Customer"
-                            )
-                            .font(.headline)
+                        HStack(alignment: .center, spacing: 12) {
 
-                            if let meter = viewModel.meter(for: inspection) {
-                                Text("Meter: \(meter.meterNumber) · \(meter.meterType)")
-                                    .font(.subheadline)
-                            } else {
-                                Text("Meter details unavailable")
-                                    .font(.subheadline)
+                            VStack(alignment: .leading, spacing: 6) {
+                                inspectionRowContent(inspection: inspection)
+
+                                VideoPickerView(
+                                    hasVideo: inspection.videoFilePath != nil,
+                                    videoSyncStatus: inspection.videoSyncStatus
+                                ) { videoURL in
+                                    try await viewModel.attachVideo(
+                                        inspectionID: inspection.id,
+                                        sourceURL: videoURL
+                                    )
+                                }
+                                .padding(.top, 8)
                             }
 
-                            Text("Reading: \(inspection.readings.description)")
-                                .font(.subheadline)
+                            Spacer()
 
-                            Text(inspection.inspectionDate, style: .date)
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-
-
-                            VideoPickerView(
-                                hasVideo: inspection.videoFilePath != nil,
-                                videoSyncStatus: inspection.videoSyncStatus
-                            ) { videoURL in
-                                try await viewModel.attachVideo(
-                                    inspectionID: inspection.id,
-                                    sourceURL: videoURL
-                                )
+                            Button {
+                                selectedInspection = inspection
+                                showInspectionDetails = true
+                            } label: {
+                                Image(systemName: "chevron.right")
+                                    .foregroundStyle(.secondary)
+                                    .padding(12)
+                                    .contentShape(Rectangle())
                             }
-                            .padding(.top, 8)
+                            .buttonStyle(.plain)
                         }
-                        .padding(.vertical, 4)
                     }
                 }
             }
             .navigationTitle("Inspections")
+            .navigationDestination(isPresented: $showInspectionDetails) {
+                if let selectedInspection {
+                    InspectionDetailView(
+                        inspection: selectedInspection,
+                        videoStorageService: viewModel.videoStorageService
+                    )
+                }
+            }
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
@@ -111,7 +116,37 @@ struct InspectionListView: View {
         .task {
             await viewModel.loadInspections()
         }
+        .padding(.top, 8)
 
+
+
+    }
+
+    @ViewBuilder
+    func inspectionRowContent(inspection: Inspection) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(
+                viewModel.customer(for: inspection)?.name
+                ?? "Unknown Customer"
+            )
+            .font(.headline)
+
+            if let meter = viewModel.meter(for: inspection) {
+                Text("Meter: \(meter.meterNumber) · \(meter.meterType)")
+                    .font(.subheadline)
+            } else {
+                Text("Meter details unavailable")
+                    .font(.subheadline)
+            }
+
+            Text("Reading: \(inspection.readings.description)")
+                .font(.subheadline)
+
+            Text(inspection.inspectionDate, style: .date)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+        .padding(.vertical, 4)
     }
 }
 

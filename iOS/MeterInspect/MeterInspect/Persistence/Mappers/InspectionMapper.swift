@@ -19,15 +19,31 @@ struct InspectionMapper {
     // MARK: - Persistence to Domain
 
     static func toDomain(_ entity: InspectionEntity) -> Inspection {
-        Inspection(
+        let savedStatus = VideoSyncStatus(
+            rawValue: entity.videoSyncStatus
+        ) ?? .notRequired
+
+        let videoStatus: VideoSyncStatus
+
+        if entity.videoFilePath == nil {
+            videoStatus = .notRequired
+        } else if savedStatus == .notRequired {
+            videoStatus = .pending
+        } else {
+            videoStatus = savedStatus
+        }
+
+        return Inspection(
             id: entity.id,
             meterID: entity.meterID,
             readings: entity.readings,
             inspectionDate: entity.inspectionDate,
             videoFilePath: entity.videoFilePath,
             status: InspectionStatus(rawValue: entity.status) ?? .draft,
-            metadataSyncStatus: MetadataSyncStatus(rawValue: entity.metadataSyncStatus) ?? .pending,
-            videoSyncStatus: VideoSyncStatus(rawValue: entity.videoSyncStatus) ?? .notRequired
+            metadataSyncStatus: MetadataSyncStatus(
+                rawValue: entity.metadataSyncStatus
+            ) ?? .pending,
+            videoSyncStatus: videoStatus
         )
     }
 }
