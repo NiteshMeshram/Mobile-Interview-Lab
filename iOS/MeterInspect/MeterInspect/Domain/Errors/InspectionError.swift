@@ -5,4 +5,6 @@ enum InspectionError: Error {
         from: InspectionStatus,
         to: InspectionStatus
     )
+
+    case inspectionNotFound
 }

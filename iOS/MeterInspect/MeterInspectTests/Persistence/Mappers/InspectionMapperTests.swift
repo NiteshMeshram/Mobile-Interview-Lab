@@ -18,7 +18,9 @@ struct InspectionMapperTests {
             readings: Decimal(string: "1450.75")!,
             inspectionDate: inspectionDate,
             videoFilePath: "/videos/meter-inspection.mp4",
-            status: .pendingSync
+            status: .completed,
+            metadataSyncStatus: .synced,
+            videoSyncStatus: .uploading
         )
 
         let entity = InspectionMapper.toEntity(inspection)
@@ -28,7 +30,9 @@ struct InspectionMapperTests {
         #expect(entity.readings == Decimal(string: "1450.75")!)
         #expect(entity.inspectionDate == inspectionDate)
         #expect(entity.videoFilePath == "/videos/meter-inspection.mp4")
-        #expect(entity.status == InspectionStatus.pendingSync.rawValue)
+        #expect(entity.status == InspectionStatus.completed.rawValue)
+        #expect(entity.metadataSyncStatus == MetadataSyncStatus.synced.rawValue)
+        #expect(entity.videoSyncStatus == VideoSyncStatus.uploading.rawValue)
     }
 
     @Test
@@ -45,6 +49,8 @@ struct InspectionMapperTests {
         let entity = InspectionMapper.toEntity(inspection)
 
         #expect(entity.videoFilePath == nil)
+        #expect(entity.metadataSyncStatus == MetadataSyncStatus.pending.rawValue)
+        #expect(entity.videoSyncStatus == VideoSyncStatus.notRequired.rawValue)
     }
 
     // MARK: - Persistence to Domain
@@ -61,7 +67,9 @@ struct InspectionMapperTests {
             readings: Decimal(string: "1450.75")!,
             inspectionDate: inspectionDate,
             videoFilePath: "/videos/meter-inspection.mp4",
-            status: InspectionStatus.synced.rawValue
+            status: InspectionStatus.completed.rawValue,
+            metadataSyncStatus: MetadataSyncStatus.synced.rawValue,
+            videoSyncStatus: VideoSyncStatus.uploaded.rawValue
         )
 
         let inspection = InspectionMapper.toDomain(entity)
@@ -71,7 +79,9 @@ struct InspectionMapperTests {
         #expect(inspection.readings == Decimal(string: "1450.75")!)
         #expect(inspection.inspectionDate == inspectionDate)
         #expect(inspection.videoFilePath == "/videos/meter-inspection.mp4")
-        #expect(inspection.status == .synced)
+        #expect(inspection.status == .completed)
+        #expect(inspection.metadataSyncStatus == .synced)
+        #expect(inspection.videoSyncStatus == .uploaded)
     }
 
     @Test
@@ -82,13 +92,17 @@ struct InspectionMapperTests {
             readings: Decimal(string: "1000.00")!,
             inspectionDate: .now,
             videoFilePath: nil,
-            status: InspectionStatus.draft.rawValue
+            status: InspectionStatus.draft.rawValue,
+            metadataSyncStatus: MetadataSyncStatus.pending.rawValue,
+            videoSyncStatus: VideoSyncStatus.notRequired.rawValue
         )
 
         let inspection = InspectionMapper.toDomain(entity)
 
         #expect(inspection.videoFilePath == nil)
         #expect(inspection.status == .draft)
+        #expect(inspection.metadataSyncStatus == .pending)
+        #expect(inspection.videoSyncStatus == .notRequired)
     }
 
     // MARK: - Invalid Status Handling
@@ -101,7 +115,9 @@ struct InspectionMapperTests {
             readings: Decimal(string: "1500.00")!,
             inspectionDate: .now,
             videoFilePath: nil,
-            status: "unknownStatus"
+            status: InspectionStatus.draft.rawValue,
+            metadataSyncStatus: "unknownStatus",
+            videoSyncStatus: VideoSyncStatus.notRequired.rawValue
         )
 
         let inspection = InspectionMapper.toDomain(entity)
@@ -119,7 +135,9 @@ struct InspectionMapperTests {
             readings: Decimal(string: "1750.25")!,
             inspectionDate: .now,
             videoFilePath: "/videos/inspection.mp4",
-            status: .syncFailed
+            status: .completed,
+            metadataSyncStatus: .failed,
+            videoSyncStatus: .failed
         )
 
         let entity = InspectionMapper.toEntity(original)
@@ -131,6 +149,8 @@ struct InspectionMapperTests {
         #expect(restored.inspectionDate == original.inspectionDate)
         #expect(restored.videoFilePath == original.videoFilePath)
         #expect(restored.status == original.status)
+        #expect(restored.metadataSyncStatus == original.metadataSyncStatus)
+        #expect(restored.videoSyncStatus == original.videoSyncStatus)
     }
 }
 

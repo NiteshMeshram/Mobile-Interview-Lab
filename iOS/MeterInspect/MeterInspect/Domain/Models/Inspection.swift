@@ -7,6 +7,8 @@ struct Inspection: Identifiable {
     let inspectionDate: Date
     var videoFilePath: String?
     var status: InspectionStatus
+    var metadataSyncStatus: MetadataSyncStatus = .pending
+    var videoSyncStatus: VideoSyncStatus = .notRequired
 
     mutating func transition(to newStatus: InspectionStatus) throws {
         guard status.canTransition(to: newStatus) else {

@@ -1,4 +1,3 @@
-//
 import Foundation
 import UIKit
 
@@ -11,7 +10,9 @@ struct InspectionMapper {
             readings: inspection.readings,
             inspectionDate: inspection.inspectionDate,
             videoFilePath: inspection.videoFilePath,
-            status: inspection.status.rawValue
+            status: inspection.status.rawValue,
+            metadataSyncStatus: inspection.metadataSyncStatus.rawValue,
+            videoSyncStatus: inspection.videoSyncStatus.rawValue
         )
     }
 
@@ -24,7 +25,9 @@ struct InspectionMapper {
             readings: entity.readings,
             inspectionDate: entity.inspectionDate,
             videoFilePath: entity.videoFilePath,
-            status: InspectionStatus(rawValue: entity.status) ?? .draft
+            status: InspectionStatus(rawValue: entity.status) ?? .draft,
+            metadataSyncStatus: MetadataSyncStatus(rawValue: entity.metadataSyncStatus) ?? .pending,
+            videoSyncStatus: VideoSyncStatus(rawValue: entity.videoSyncStatus) ?? .notRequired
         )
     }
 }

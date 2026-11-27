@@ -31,7 +31,7 @@ struct SwiftDataInspectionRepositoryTests {
             readings: 1250.50,
             inspectionDate: Date(),
             videoFilePath: nil,
-            status: .pendingSync
+            status: .draft
         )
     }
 
@@ -195,7 +195,7 @@ struct SwiftDataInspectionRepositoryTests {
             readings: 100,
             inspectionDate: Date(timeIntervalSince1970: 1_700_000_000),
             videoFilePath: nil,
-            status: .pendingSync
+            status: .draft
         )
 
         let newer = Inspection(
@@ -204,7 +204,7 @@ struct SwiftDataInspectionRepositoryTests {
             readings: 200,
             inspectionDate: Date(timeIntervalSince1970: 1_720_000_000),
             videoFilePath: nil,
-            status: .pendingSync
+            status: .draft
         )
 
         let middle = Inspection(
@@ -213,7 +213,7 @@ struct SwiftDataInspectionRepositoryTests {
             readings: 150,
             inspectionDate: Date(timeIntervalSince1970: 1_710_000_000),
             videoFilePath: nil,
-            status: .pendingSync
+            status: .draft
         )
 
         // Insert in a different order from the expected result.
@@ -268,7 +268,7 @@ struct SwiftDataInspectionRepositoryTests {
             readings: 1250.50,
             inspectionDate: Date(),
             videoFilePath: videoPath,
-            status: .pendingSync
+            status: .draft
         )
 
         try await repository.add(inspection)
