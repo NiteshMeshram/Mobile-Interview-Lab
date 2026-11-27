@@ -5,8 +5,10 @@ import Foundation
 final class MockInspectionRepository: InspectionRepository {
 
     private(set) var inspections: [Inspection] = []
+    var shouldThrowOnFetchAll = false
 
     var shouldThrowError = false
+    var shouldThrowOnUpdate = false
 
     func add(_ inspection: Inspection) async throws {
         try checkForError()
@@ -19,11 +21,18 @@ final class MockInspectionRepository: InspectionRepository {
     }
 
     func fetchAll() async throws -> [Inspection] {
+        if shouldThrowOnFetchAll {
+            throw MockRepositoryError.simulatedFailure
+        }
         try checkForError()
         return inspections
     }
 
     func update(_ inspection: Inspection) async throws {
+        if shouldThrowOnUpdate {
+            throw MockRepositoryError.simulatedFailure
+        }
+
         try checkForError()
 
         guard let index = inspections.firstIndex(where: { $0.id == inspection.id }) else {

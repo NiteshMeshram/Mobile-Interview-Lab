@@ -224,5 +224,169 @@ struct InspectionListViewModelTests {
             #expect(sut.inspections.isEmpty)
         }
     }
+
+    // MARK: - Attach Video
+
+    @Test
+    func attachVideo_savesVideoAndUpdatesInspection() async throws {
+        let meterID = UUID()
+        let inspection = makeInspection(meterID: meterID)
+
+        let inspectionRepository = MockInspectionRepository()
+        inspectionRepository.seed([inspection])
+
+        let videoStorageService = MockVideoStorageService()
+        let sut = makeSUT(
+            inspectionRepository: inspectionRepository,
+            videoStorageService: videoStorageService
+        )
+
+        let sourceURL = URL(fileURLWithPath: "/tmp/source.mov")
+
+        try await sut.attachVideo(
+            inspectionID: inspection.id,
+            sourceURL: sourceURL
+        )
+
+        let updatedInspection = try #require(
+            inspectionRepository.inspections.first
+        )
+
+        #expect(updatedInspection.videoFilePath == videoStorageService.savedVideoPath)
+        #expect(updatedInspection.videoSyncStatus == .pending)
+        #expect(sut.inspections.count == 1)
+        #expect(sut.inspections.first?.videoFilePath == videoStorageService.savedVideoPath)
+    }
+
+    @Test
+    func attachVideo_throwsWhenInspectionNotFound() async {
+        let inspectionRepository = MockInspectionRepository()
+        let videoStorageService = MockVideoStorageService()
+
+        let sut = makeSUT(
+            inspectionRepository: inspectionRepository,
+            videoStorageService: videoStorageService
+        )
+
+        let inspectionID = UUID()
+        let sourceURL = URL(fileURLWithPath: "/tmp/source.mov")
+
+        do {
+            try await sut.attachVideo(
+                inspectionID: inspectionID,
+                sourceURL: sourceURL
+            )
+            Issue.record("Expected inspectionNotFound error.")
+        } catch let error as InspectionError {
+            switch error {
+            case .inspectionNotFound:
+                break
+            case .invalidStatusTransition:
+                Issue.record("Received an unexpected invalidStatusTransition error.")
+            }
+        } catch {
+            Issue.record("Unexpected error: \(error)")
+        }
+
+        #expect(videoStorageService.saveVideoCallCount == 0)
+    }
+
+    @Test
+    func attachVideo_throwsWhenVideoStorageFails() async {
+        let meterID = UUID()
+        let inspection = makeInspection(meterID: meterID)
+
+        let inspectionRepository = MockInspectionRepository()
+        inspectionRepository.seed([inspection])
+
+        let videoStorageService = MockVideoStorageService()
+        videoStorageService.shouldThrowOnSave = true
+
+        let sut = makeSUT(
+            inspectionRepository: inspectionRepository,
+            videoStorageService: videoStorageService
+        )
+
+        let sourceURL = URL(fileURLWithPath: "/tmp/source.mov")
+
+        do {
+            try await sut.attachVideo(
+                inspectionID: inspection.id,
+                sourceURL: sourceURL
+            )
+            Issue.record("Expected video storage to fail.")
+        } catch {
+            #expect(videoStorageService.saveVideoCallCount == 1)
+        }
+
+        let savedInspection = inspectionRepository.inspections.first
+        #expect(savedInspection?.videoFilePath == nil)
+        #expect(savedInspection?.videoSyncStatus == .notRequired)
+    }
+
+    @Test
+    func attachVideo_deletesSavedVideoWhenRepositoryUpdateFails() async {
+        let meterID = UUID()
+        let inspection = makeInspection(meterID: meterID)
+
+        let inspectionRepository = MockInspectionRepository()
+        inspectionRepository.seed([inspection])
+        inspectionRepository.shouldThrowOnUpdate = true
+
+        let videoStorageService = MockVideoStorageService()
+
+        let sut = makeSUT(
+            inspectionRepository: inspectionRepository,
+            videoStorageService: videoStorageService
+        )
+
+        do {
+            try await sut.attachVideo(
+                inspectionID: inspection.id,
+                sourceURL: URL(fileURLWithPath: "/tmp/source.mov")
+            )
+            Issue.record("Expected repository update to fail.")
+        } catch {
+            #expect(videoStorageService.saveVideoCallCount == 1)
+            #expect(videoStorageService.deleteVideoCallCount == 1)
+            #expect(videoStorageService.deletedPaths == [
+                videoStorageService.savedVideoPath
+            ])
+        }
+    }
+
+    @Test
+    func attachVideo_keepsSavedVideoWhenRefreshFails() async {
+        let meterID = UUID()
+        let inspection = makeInspection(meterID: meterID)
+
+        let inspectionRepository = MockInspectionRepository()
+        inspectionRepository.seed([inspection])
+
+        let videoStorageService = MockVideoStorageService()
+
+        let sut = makeSUT(
+            inspectionRepository: inspectionRepository,
+            videoStorageService: videoStorageService
+        )
+
+        // Configure the repository to fail only on the final fetchAll().
+        inspectionRepository.shouldThrowOnFetchAll = true
+
+        do {
+            try await sut.attachVideo(
+                inspectionID: inspection.id,
+                sourceURL: URL(fileURLWithPath: "/tmp/source.mov")
+            )
+            Issue.record("Expected inspection refresh to fail.")
+        } catch {
+            #expect(videoStorageService.saveVideoCallCount == 1)
+            #expect(videoStorageService.deleteVideoCallCount == 0)
+
+            let savedInspection = inspectionRepository.inspections.first
+            #expect(savedInspection?.videoFilePath == videoStorageService.savedVideoPath)
+            #expect(savedInspection?.videoSyncStatus == .pending)
+        }
+    }
 }
 
