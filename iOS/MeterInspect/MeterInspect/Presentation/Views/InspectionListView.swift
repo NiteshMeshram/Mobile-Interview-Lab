@@ -75,7 +75,10 @@ struct InspectionListView: View {
                                 .foregroundStyle(.secondary)
 
 
-                            VideoPickerView { videoURL in
+                            VideoPickerView(
+                                hasVideo: inspection.videoFilePath != nil,
+                                videoSyncStatus: inspection.videoSyncStatus
+                            ) { videoURL in
                                 try await viewModel.attachVideo(
                                     inspectionID: inspection.id,
                                     sourceURL: videoURL
@@ -110,7 +113,6 @@ struct InspectionListView: View {
         }
 
     }
-
 }
 
 #Preview {
