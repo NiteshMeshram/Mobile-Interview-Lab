@@ -36,11 +36,12 @@ final class MockVideoStorageService: VideoStorageService {
 
     func deleteVideo(at relativePath: String) async throws {
         deleteVideoCallCount += 1
-        deletedPaths.append(relativePath)
 
         if shouldThrowOnDelete {
             throw MockVideoStorageError.deleteFailed
         }
+
+        deletedPaths.append(relativePath)
     }
 }
 
