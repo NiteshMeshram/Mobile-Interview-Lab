@@ -166,4 +166,25 @@ final class InspectionListViewModel: ObservableObject {
 
         return newVideoPath
     }
+
+    func deleteVideo(inspectionID: UUID) async throws {
+        guard var inspection = try await repository.fetch(by: inspectionID) else {
+            throw InspectionError.inspectionNotFound
+        }
+
+        let oldVideoPath = inspection.videoFilePath
+
+        // Update inspection metadata first.
+        inspection.videoFilePath = nil
+        inspection.videoSyncStatus = .notRequired
+
+        try await repository.update(inspection)
+
+        // Delete the physical file only after persistence succeeds.
+        if let oldVideoPath {
+            try? await videoStorageService.deleteVideo(at: oldVideoPath)
+        }
+
+        inspections = try await repository.fetchAll()
+    }
 }
