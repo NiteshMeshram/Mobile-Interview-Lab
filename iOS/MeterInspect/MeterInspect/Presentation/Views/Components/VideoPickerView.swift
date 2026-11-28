@@ -16,15 +16,24 @@ struct VideoPickerView: View {
                 selection: $selectedItem,
                 matching: .videos
             ) {
-                showStatus()
+                Label(
+                    hasVideo ? "Replace Video" : "Select Meter Video",
+                    systemImage: hasVideo
+                    ? "arrow.triangle.2.circlepath"
+                    : "video"
+                )
             }
-            .disabled(isLoading || hasVideo)
+            .disabled(isLoading)
             .onChange(of: selectedItem) { _, newItem in
                 guard let newItem else { return }
 
                 Task {
                     await importVideo(from: newItem)
                 }
+            }
+
+            if hasVideo {
+                showStatus()
             }
 
             if let errorMessage {
@@ -40,7 +49,11 @@ struct VideoPickerView: View {
 
     @ViewBuilder
     func showStatus() -> some View {
-        if hasVideo {
+        if isLoading {
+            ProgressView(
+                hasVideo ? "Replacing video..." : "Importing video..."
+            )
+        } else if hasVideo {
             switch videoSyncStatus {
             case .pending:
                 Label(
@@ -64,8 +77,6 @@ struct VideoPickerView: View {
                 Label("Video attached", systemImage: "video")
                     .foregroundStyle(.green)
             }
-        } else if isLoading {
-            ProgressView("Importing video...")
         } else {
             Label("Select Meter Video", systemImage: "video")
         }

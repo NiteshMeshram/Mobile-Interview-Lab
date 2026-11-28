@@ -388,5 +388,287 @@ struct InspectionListViewModelTests {
             #expect(savedInspection?.videoSyncStatus == .pending)
         }
     }
+
+    // MARK: - Replace Video
+
+    @Test
+    func replaceVideo_savesNewVideoAndDeletesOldVideo() async throws {
+        // Arrange
+        let meterID = UUID()
+        let oldVideoPath = "MeterVideos/old-video.mov"
+
+        var inspection = makeInspection(meterID: meterID)
+        inspection.videoFilePath = oldVideoPath
+
+        let inspectionRepository = MockInspectionRepository()
+        inspectionRepository.seed([inspection])
+
+        let videoStorageService = MockVideoStorageService()
+
+        let sut = makeSUT(
+            inspectionRepository: inspectionRepository,
+            videoStorageService: videoStorageService
+        )
+
+        let sourceURL = URL(fileURLWithPath: "/tmp/replacement.mov")
+
+        // Act
+        let newVideoPath = try await sut.replaceVideo(
+            inspectionID: inspection.id,
+            sourceURL: sourceURL
+        )
+
+        // Assert
+        let updatedInspection = try #require(
+            inspectionRepository.inspections.first
+        )
+
+        #expect(newVideoPath == videoStorageService.savedVideoPath)
+
+        #expect(
+            updatedInspection.videoFilePath == videoStorageService.savedVideoPath
+        )
+        #expect(updatedInspection.videoSyncStatus == .pending)
+
+        #expect(videoStorageService.saveVideoCallCount == 1)
+        #expect(videoStorageService.deleteVideoCallCount == 1)
+        #expect(videoStorageService.deletedPaths == [oldVideoPath])
+
+        #expect(sut.inspections.count == 1)
+        #expect(sut.inspections.first?.videoFilePath == newVideoPath)
+    }
+
+    @Test
+    func replaceVideo_deletesNewVideoWhenRepositoryUpdateFails() async {
+        // Arrange
+        let meterID = UUID()
+        let oldVideoPath = "MeterVideos/old-video.mov"
+
+        var inspection = makeInspection(meterID: meterID)
+        inspection.videoFilePath = oldVideoPath
+
+        let inspectionRepository = MockInspectionRepository()
+        inspectionRepository.seed([inspection])
+        inspectionRepository.shouldThrowOnUpdate = true
+
+        let videoStorageService = MockVideoStorageService()
+
+        let sut = makeSUT(
+            inspectionRepository: inspectionRepository,
+            videoStorageService: videoStorageService
+        )
+
+        let sourceURL = URL(fileURLWithPath: "/tmp/replacement.mov")
+
+        // Act & Assert
+        do {
+            _ = try await sut.replaceVideo(
+                inspectionID: inspection.id,
+                sourceURL: sourceURL
+            )
+
+            Issue.record("Expected repository update to fail.")
+        } catch {
+            #expect(videoStorageService.saveVideoCallCount == 1)
+            #expect(videoStorageService.deleteVideoCallCount == 1)
+
+            #expect(
+                videoStorageService.deletedPaths == [
+                    videoStorageService.savedVideoPath
+                ]
+            )
+
+            let savedInspection = inspectionRepository.inspections.first
+
+            #expect(savedInspection?.videoFilePath == oldVideoPath)
+        }
+    }
+
+    @Test
+    func replaceVideo_succeedsWhenOldVideoCleanupFails() async throws {
+        // Arrange
+        let meterID = UUID()
+        let oldVideoPath = "MeterVideos/old-video.mov"
+
+        var inspection = makeInspection(meterID: meterID)
+        inspection.videoFilePath = oldVideoPath
+
+        let inspectionRepository = MockInspectionRepository()
+        inspectionRepository.seed([inspection])
+
+        let videoStorageService = MockVideoStorageService()
+        videoStorageService.shouldThrowOnDelete = true
+
+        let sut = makeSUT(
+            inspectionRepository: inspectionRepository,
+            videoStorageService: videoStorageService
+        )
+
+        let sourceURL = URL(fileURLWithPath: "/tmp/replacement.mov")
+
+        // Act
+        let newVideoPath = try await sut.replaceVideo(
+            inspectionID: inspection.id,
+            sourceURL: sourceURL
+        )
+
+        // Assert
+        let updatedInspection = try #require(
+            inspectionRepository.inspections.first
+        )
+
+        #expect(newVideoPath == videoStorageService.savedVideoPath)
+        #expect(updatedInspection.videoFilePath == newVideoPath)
+        #expect(updatedInspection.videoSyncStatus == .pending)
+
+        #expect(videoStorageService.saveVideoCallCount == 1)
+        #expect(videoStorageService.deleteVideoCallCount == 1)
+        #expect(videoStorageService.deletedPaths.isEmpty)
+    }
+
+    @Test
+    func replaceVideo_throwsWhenInspectionNotFound() async {
+        // Arrange
+        let videoStorageService = MockVideoStorageService()
+
+        let sut = makeSUT(
+            videoStorageService: videoStorageService
+        )
+
+        // Act & Assert
+        do {
+            _ = try await sut.replaceVideo(
+                inspectionID: UUID(),
+                sourceURL: URL(fileURLWithPath: "/tmp/replacement.mov")
+            )
+
+            Issue.record("Expected inspectionNotFound error.")
+        } catch let error as InspectionError {
+            switch error {
+            case .inspectionNotFound:
+                break
+            case .invalidStatusTransition:
+                Issue.record("Received unexpected invalidStatusTransition error.")
+            }
+        } catch {
+            Issue.record("Unexpected error: \(error)")
+        }
+
+        #expect(videoStorageService.saveVideoCallCount == 0)
+        #expect(videoStorageService.deleteVideoCallCount == 0)
+    }
+
+    @Test
+    func deleteVideo_deletesVideoAndUpdatesInspection() async throws {
+        let meterID = UUID()
+        var inspection = makeInspection(meterID: meterID)
+
+        let oldVideoPath = "MeterVideos/test-inspection.mov"
+        inspection.videoFilePath = oldVideoPath
+        inspection.videoSyncStatus = .pending
+
+        let inspectionRepository = MockInspectionRepository()
+        inspectionRepository.seed([inspection])
+
+        let videoStorageService = MockVideoStorageService()
+
+        let sut = makeSUT(
+            inspectionRepository: inspectionRepository,
+            videoStorageService: videoStorageService
+        )
+
+        try await sut.deleteVideo(inspectionID: inspection.id)
+
+        let updatedInspection = try #require(
+            inspectionRepository.inspections.first
+        )
+
+        // Verify inspection metadata.
+        #expect(updatedInspection.videoFilePath == nil)
+        #expect(updatedInspection.videoSyncStatus == .notRequired)
+
+        // Verify local video cleanup.
+        #expect(videoStorageService.deleteVideoCallCount == 1)
+        #expect(videoStorageService.deletedPaths == [oldVideoPath])
+
+        // Verify UI state refresh.
+        #expect(sut.inspections.count == 1)
+        #expect(sut.inspections.first?.videoFilePath == nil)
+        #expect(sut.inspections.first?.videoSyncStatus == .notRequired)
+    }
+
+    @Test
+    func deleteVideo_doesNotDeleteFileWhenRepositoryUpdateFails() async {
+        let meterID = UUID()
+        var inspection = makeInspection(meterID: meterID)
+
+        let oldVideoPath = "MeterVideos/test-inspection.mov"
+        inspection.videoFilePath = oldVideoPath
+        inspection.videoSyncStatus = .pending
+
+        let inspectionRepository = MockInspectionRepository()
+        inspectionRepository.seed([inspection])
+        inspectionRepository.shouldThrowOnUpdate = true
+
+        let videoStorageService = MockVideoStorageService()
+
+        let sut = makeSUT(
+            inspectionRepository: inspectionRepository,
+            videoStorageService: videoStorageService
+        )
+
+        do {
+            try await sut.deleteVideo(inspectionID: inspection.id)
+            Issue.record("Expected repository update to fail.")
+        } catch {
+            // Original metadata and video must remain unchanged.
+            let savedInspection = inspectionRepository.inspections.first
+
+            #expect(savedInspection?.videoFilePath == oldVideoPath)
+            #expect(savedInspection?.videoSyncStatus == .pending)
+
+            #expect(videoStorageService.deleteVideoCallCount == 0)
+            #expect(videoStorageService.deletedPaths.isEmpty)
+        }
+    }
+
+    @Test
+    func deleteVideo_succeedsWhenFileCleanupFails() async throws {
+        let meterID = UUID()
+        var inspection = makeInspection(meterID: meterID)
+
+        let oldVideoPath = "MeterVideos/test-inspection.mov"
+        inspection.videoFilePath = oldVideoPath
+        inspection.videoSyncStatus = .pending
+
+        let inspectionRepository = MockInspectionRepository()
+        inspectionRepository.seed([inspection])
+
+        let videoStorageService = MockVideoStorageService()
+        videoStorageService.shouldThrowOnDelete = true
+
+        let sut = makeSUT(
+            inspectionRepository: inspectionRepository,
+            videoStorageService: videoStorageService
+        )
+
+        try await sut.deleteVideo(inspectionID: inspection.id)
+
+        let updatedInspection = try #require(
+            inspectionRepository.inspections.first
+        )
+
+        // Metadata deletion succeeds.
+        #expect(updatedInspection.videoFilePath == nil)
+        #expect(updatedInspection.videoSyncStatus == .notRequired)
+
+        // Physical cleanup was attempted but failed.
+        #expect(videoStorageService.deleteVideoCallCount == 1)
+        #expect(videoStorageService.deletedPaths.isEmpty)
+
+        // UI state remains consistent.
+        #expect(sut.inspections.first?.videoFilePath == nil)
+    }
+
 }
 
