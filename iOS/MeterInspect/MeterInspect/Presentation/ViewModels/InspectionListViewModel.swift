@@ -125,4 +125,45 @@ final class InspectionListViewModel: ObservableObject {
             inspections.first(where: { $0.id == inspectionID })?.videoSyncStatus as Any
         )
     }
+
+    func replaceVideo(
+        inspectionID: UUID,
+        sourceURL: URL
+    ) async throws -> String {
+        guard var inspection = try await repository.fetch(by: inspectionID) else {
+            throw InspectionError.inspectionNotFound
+        }
+
+        // Retain the existing video path.
+        let oldVideoPath = inspection.videoFilePath
+
+        // 1. Save replacement video locally.
+        let newVideoPath = try await videoStorageService.saveVideo(
+            from: sourceURL,
+            for: inspectionID
+        )
+
+        // 2. Update inspection metadata.
+        inspection.videoFilePath = newVideoPath
+        inspection.videoSyncStatus = .pending
+
+        // 3. Persist the updated inspection.
+        do {
+            try await repository.update(inspection)
+        } catch {
+            // Preserve the old video if persistence fails.
+            try? await videoStorageService.deleteVideo(at: newVideoPath)
+            throw error
+        }
+
+        // 4. Delete old video only after successful persistence.
+        if let oldVideoPath {
+            try? await videoStorageService.deleteVideo(at: oldVideoPath)
+        }
+
+        // 5. Refresh inspection list.
+        inspections = try await repository.fetchAll()
+
+        return newVideoPath
+    }
 }

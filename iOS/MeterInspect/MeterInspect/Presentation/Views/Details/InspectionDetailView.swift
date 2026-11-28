@@ -5,8 +5,23 @@ struct InspectionDetailView: View {
     // MARK: - Properties
     let inspection: Inspection
     let videoStorageService: VideoStorageService
+    let onReplaceVideo: (URL) async throws -> String
+    @State private var displayedVideoPath: String?
 
     // MARK: - Initialization
+
+    init(
+        inspection: Inspection,
+        videoStorageService: VideoStorageService,
+        onReplaceVideo: @escaping (URL) async throws -> String
+    ) {
+        self.inspection = inspection
+        self.videoStorageService = videoStorageService
+        self.onReplaceVideo = onReplaceVideo
+        _displayedVideoPath = State(
+            initialValue: inspection.videoFilePath
+        )
+    }
 
     // MARK: - Lifecycle
     var body: some View {
@@ -74,17 +89,26 @@ struct InspectionDetailView: View {
     @ViewBuilder
     func previewVideoContent() -> some View {
         Section ("Video") {
-            if let videoFilePath = inspection.videoFilePath {
+            if let videoFilePath = displayedVideoPath {
                 InspectionVideoPlayerContainer(
                     videoFilePath: videoFilePath,
                     videoStorageService: videoStorageService
                 )
+                .id(videoFilePath)
             } else {
                 Label(
                     "No video attached",
                     systemImage: "video.slash"
                 )
                 .foregroundStyle(.secondary)
+            }
+
+            VideoPickerView(
+                hasVideo: inspection.videoFilePath != nil,
+                videoSyncStatus: inspection.videoSyncStatus
+            ) { videoURL in
+                let newVideoPath = try await onReplaceVideo(videoURL)
+                displayedVideoPath = newVideoPath
             }
         }
 

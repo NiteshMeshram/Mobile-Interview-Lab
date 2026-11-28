@@ -41,7 +41,6 @@ struct InspectionVideoPlayerContainer: View {
         isLoading = true
         defer { isLoading = false }
         videoURL = await videoStorageService.videoURL(for: videoFilePath)
-
     }
 }
 

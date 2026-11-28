@@ -92,7 +92,13 @@ struct InspectionListView: View {
                 if let selectedInspection {
                     InspectionDetailView(
                         inspection: selectedInspection,
-                        videoStorageService: viewModel.videoStorageService
+                        videoStorageService: viewModel.videoStorageService,
+                        onReplaceVideo: { videoURL in
+                            try await viewModel.replaceVideo(
+                                inspectionID: selectedInspection.id,
+                                sourceURL: videoURL
+                            )
+                        }
                     )
                 }
             }
